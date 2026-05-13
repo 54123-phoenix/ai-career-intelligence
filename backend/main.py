@@ -92,6 +92,11 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
     app.include_router(auth_router, prefix="/api/v1/users", tags=["User"])
 
+    # Chat routes
+    from backend.api.routes.chat import router as chat_router
+
+    app.include_router(chat_router, prefix="/api/v1/chat", tags=["Chat"])
+
     return app
 
 

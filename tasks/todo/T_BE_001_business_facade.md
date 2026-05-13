@@ -35,7 +35,7 @@ created: 2026-05-13
     - `PATCH /users/me`
     - `GET /users/me/history`
   - 新增端点：
-    - `POST /chat/message`（SSE）
+    - `POST /chat/message`（SSE）✅ 已创建 `backend/api/routes/chat.py`
 - 旧端点标记 deprecated：在 `/career/t008/*`、`/career/t009/*`、`/career/t010/*` 的响应头加 `Deprecation: true`
 
 ## 约束
