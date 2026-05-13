@@ -54,20 +54,30 @@ export async function analyzeCareer(
 }
 
 /** 获取岗位推荐列表 */
-export async function getJobRecommendations(): Promise<JobRecommendation[]> {
-  const res = await apiFetch<{ recommendations: JobRecommendation[] }>('/career/recommendations');
+export async function getJobRecommendations(user_input: string): Promise<JobRecommendation[]> {
+  const res = await apiFetch<{ recommendations: JobRecommendation[] }>('/career/recommendations', {
+    method: 'POST',
+    body: JSON.stringify({ user_input }),
+  });
   return res.recommendations || [];
 }
 
 /** 获取匹配评分 */
 export async function getMatchScore(params: {
-  resume_id: string;
-  job_id: string;
-}): Promise<{ score: number; breakdown: Record<string, number> }> {
-  const search = new URLSearchParams();
-  search.set('resume_id', params.resume_id);
-  search.set('job_id', params.job_id);
-  return apiFetch(`/career/match-score?${search.toString()}`);
+  user_input: string;
+  job_title: string;
+  required_skills: string[];
+}): Promise<{
+  job_title: string;
+  score: number;
+  breakdown: Record<string, number>;
+  matched_skills: string[];
+  missing_skills: string[];
+}> {
+  return apiFetch('/career/match-score', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 /** 上传简历 */
@@ -109,8 +119,16 @@ export async function submitCareerFeedback(params: {
 }
 
 /** 获取职业路径图数据 */
-export async function getCareerPath(): Promise<CareerPathGraph> {
-  return apiFetch<CareerPathGraph>('/career/path');
+export async function getCareerPath(user_input: string): Promise<{
+  primary_path: string[];
+  skill_nodes: any[];
+  timeline_nodes: any[];
+  skill_edges: any[];
+}> {
+  return apiFetch('/career/path', {
+    method: 'POST',
+    body: JSON.stringify({ user_input }),
+  });
 }
 
 /** 获取长期趋势 */

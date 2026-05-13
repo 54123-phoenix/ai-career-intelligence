@@ -549,6 +549,8 @@ async def career_analyze(body: CareerAnalyzeRequest):
         "simulation": output.simulation_feedback.model_dump() if output.simulation_feedback else None,
         "frontend_data": output.frontend_data,
         "generated_at": output.generated_at,
+        "career_data": None,
+        "errors": output.errors,
     }
 
 
@@ -566,25 +568,76 @@ async def career_upload_resume():
     }
 
 
-@router.get("/recommendations", response_model=dict, tags=["Career Facade"])
-async def career_recommendations(user_id: str = "default-user"):
-    """业务 facade：获取岗位推荐列表."""
-    # MVP: return mock data or integrate with retriever
+class RecommendationsRequest(BaseModel):
+    user_input: str = Field(description="用户职业目标、技能与经验描述")
+
+
+class MatchScoreRequest(BaseModel):
+    user_input: str = Field(description="用户职业目标、技能与经验描述")
+    job_title: str = Field(description="目标岗位名称")
+    required_skills: list[str] = Field(default_factory=list, description="岗位所需技能")
+
+
+class CareerPathRequest(BaseModel):
+    user_input: str = Field(description="用户职业目标、技能与经验描述")
+
+
+@router.post("/recommendations", response_model=dict, tags=["Career Facade"])
+async def career_recommendations(body: RecommendationsRequest):
+    """业务 facade：获取岗位推荐列表.
+
+    内部调用 T010 pipeline 提取 job_recommendations。
+    """
+    output = _t010.run(
+        user_input=body.user_input,
+        user_id="facade-user",
+        privacy_level="basic",
+    )
     return {
-        "user_id": user_id,
-        "recommendations": [],
-        "message": "Recommendations endpoint ready — integrate with retriever",
+        "recommendations": [j.model_dump() for j in output.job_recommendations],
+        "total_matches": output.total_matches,
     }
 
 
-@router.get("/match-score", response_model=dict, tags=["Career Facade"])
-async def career_match_score(resume_id: str, job_id: str):
-    """业务 facade：查询用户与特定岗位的匹配评分."""
+@router.post("/match-score", response_model=dict, tags=["Career Facade"])
+async def career_match_score(body: MatchScoreRequest):
+    """业务 facade：查询用户与特定岗位的匹配评分.
+
+    内部调用 T010 pipeline 解析用户画像，再与岗位技能计算 Jaccard 相似度。
+    """
+    output = _t010.run(
+        user_input=body.user_input,
+        user_id="facade-user",
+        privacy_level="basic",
+    )
+
+    user_skills = set(output.user_profile.skills) if output.user_profile else set()
+    job_skills = set(body.required_skills)
+
+    intersection = user_skills & job_skills
+    union = user_skills | job_skills
+    skill_match = len(intersection) / len(union) if union else 0.0
+
+    experience_years = output.user_profile.experience_years if output.user_profile else 0
+    # Simple heuristic: 3+ years = full fit, less = proportional
+    experience_fit = min(experience_years / 3.0, 1.0)
+
+    # Keyword overlap: user career goals vs job title
+    goals = " ".join(output.user_profile.career_goals).lower() if output.user_profile else ""
+    keyword_overlap = 1.0 if body.job_title.lower() in goals else 0.5
+
+    overall = (skill_match * 0.5) + (experience_fit * 0.3) + (keyword_overlap * 0.2)
+
     return {
-        "resume_id": resume_id,
-        "job_id": job_id,
-        "score": 0.85,
-        "breakdown": {"skill_match": 0.9, "experience_fit": 0.8, "keyword_overlap": 0.85},
+        "job_title": body.job_title,
+        "score": round(overall, 2),
+        "breakdown": {
+            "skill_match": round(skill_match, 2),
+            "experience_fit": round(experience_fit, 2),
+            "keyword_overlap": round(keyword_overlap, 2),
+        },
+        "matched_skills": list(intersection),
+        "missing_skills": list(job_skills - user_skills),
     }
 
 
@@ -594,24 +647,58 @@ async def career_feedback(body: CareerFeedbackRequest):
     return {"received": True, "feedback_id": f"fb-{body.analysis_id}"}
 
 
-@router.get("/path", response_model=dict, tags=["Career Facade"])
-async def career_path(user_id: str = "default-user"):
-    """业务 facade：获取职业路径图数据."""
-    return {
-        "user_id": user_id,
-        "nodes": [],
-        "edges": [],
-        "message": "Path graph endpoint ready — integrate with architect",
-    }
+@router.post("/path", response_model=dict, tags=["Career Facade"])
+async def career_path(body: CareerPathRequest):
+    """业务 facade：获取职业路径图数据.
+
+    内部调用 T010 pipeline 提取 visualization_data。
+    """
+    output = _t010.run(
+        user_input=body.user_input,
+        user_id="facade-user",
+        privacy_level="basic",
+    )
+
+    viz = output.visualization_data
+    if viz:
+        return {
+            "primary_path": viz.primary_path,
+            "skill_nodes": [n.model_dump() for n in viz.skill_nodes],
+            "timeline_nodes": [n.model_dump() for n in viz.timeline_nodes],
+            "skill_edges": viz.skill_edges,
+        }
+
+    # Fallback: derive from career_plan
+    plan = output.career_plan
+    if plan:
+        return {
+            "primary_path": plan.selected_strategy.strategy.strategy_name if plan.selected_strategy else [],
+            "skill_nodes": [],
+            "timeline_nodes": [],
+            "skill_edges": [],
+        }
+
+    return {"primary_path": [], "skill_nodes": [], "timeline_nodes": [], "skill_edges": []}
 
 
 @router.get("/trends", response_model=dict, tags=["Career Facade"])
 async def career_trends(user_id: str = "default-user"):
-    """业务 facade：获取长期趋势分析."""
+    """业务 facade：获取长期趋势分析.
+
+    MVP: 返回基于行业基准的 mock 趋势数据。
+    """
+    # In production, integrate with external labor market data APIs
+    mock_trends = [
+        {"domain": "互联网", "trend_name": "云原生架构师需求增长", "direction": "up", "growth_rate_pct": 35},
+        {"domain": "人工智能", "trend_name": "大模型应用开发", "direction": "up", "growth_rate_pct": 58},
+        {"domain": "后端开发", "trend_name": "Go / Rust 高性能服务", "direction": "up", "growth_rate_pct": 22},
+        {"domain": "数据工程", "trend_name": "实时数据管道", "direction": "up", "growth_rate_pct": 18},
+        {"domain": "前端开发", "trend_name": "全栈型前端", "direction": "stable", "growth_rate_pct": 8},
+    ]
     return {
         "user_id": user_id,
-        "trends": [],
-        "message": "Trends endpoint ready — integrate with career memory",
+        "trends": mock_trends,
+        "updated_at": "2026-05-13",
     }
 
 
