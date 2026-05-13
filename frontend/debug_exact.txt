@@ -1,3 +1,0 @@
-Context repr: ': "互联�?,\n '
-Context bytes: 3a2022e4ba92e88194efbfbd3f2c0a20
-Char itself: '�'

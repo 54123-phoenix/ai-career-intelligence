@@ -1,2 +1,0 @@
-Index: 30797
-'text-2xl mb-2">�?/div>\n       '

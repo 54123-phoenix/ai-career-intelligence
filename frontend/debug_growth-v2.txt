@@ -1,4 +1,0 @@
-tion: "北京",
-    industry: "互联�?, source: "sample",
-  },
- 
