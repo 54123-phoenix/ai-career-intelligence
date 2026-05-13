@@ -2,8 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BrainCircuit, LayoutDashboard, BarChart3, GitBranch, MessageSquare, User } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import {
+  BrainCircuit,
+  LayoutDashboard,
+  BarChart3,
+  GitBranch,
+  MessageSquare,
+  User,
+  LogOut,
+  ChevronDown,
+} from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useAuthStore } from '@/stores/authStore';
 
 const navItems = [
   { href: '/dashboard', label: '仪表盘', icon: <LayoutDashboard size={16} /> },
@@ -16,6 +27,20 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname();
   const isDashboard = pathname === '/dashboard';
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <nav
@@ -63,8 +88,52 @@ export function Navbar() {
               );
             })}
           </div>
-          <div className="ml-2 border-l border-gray-200 dark:border-slate-700 pl-2">
+
+          <div className="ml-2 flex items-center gap-2 border-l border-gray-200 pl-2 dark:border-slate-700">
             <ThemeToggle />
+
+            {/* User dropdown */}
+            {user && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                    isDashboard
+                      ? 'text-slate-300 hover:bg-slate-800'
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                    <User size={14} />
+                  </div>
+                  <span className="hidden sm:inline">{user.name || user.email}</span>
+                  <ChevronDown size={14} />
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-44 rounded-lg border bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                    <Link
+                      href="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <User size={14} />
+                      用户中心
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    >
+                      <LogOut size={14} />
+                      退出登录
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
