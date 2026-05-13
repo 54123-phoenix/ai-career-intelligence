@@ -1,8 +1,4 @@
-/** Career Analysis API — 职业分析引擎与职业模拟的业务语义封装
- *
- * 本层将底层 pipeline API（T008/T010 等构建产物）封装为业务语义函数，
- * 前端页面应直接调用此处函数，而非直接引用 t008-api / t010-api。
- */
+/** @deprecated — 本文件保留向后兼容，新代码请使用 lib/api/career.ts */
 
 import type { T010PipelineOutput } from "@/types/t010";
 import type { T008PipelineOutput } from "@/types/t008";
@@ -21,7 +17,6 @@ export interface CareerAnalysisResult {
   source: "api" | "mock";
 }
 
-/** 职业综合分析 — 解析画像、推荐岗位、生成策略、模拟验证 */
 export async function analyzeCareer(
   params: CareerAnalysisRequest
 ): Promise<CareerAnalysisResult> {
@@ -33,7 +28,6 @@ export async function analyzeCareer(
   });
 }
 
-/** 职业推荐与策略对比 — 返回结构化推荐列表与策略评分 */
 export async function getCareerRecommendations(
   params: CareerAnalysisRequest
 ): Promise<T008PipelineOutput> {
@@ -44,7 +38,6 @@ export async function getCareerRecommendations(
   });
 }
 
-/** 提交用户反馈 — 用于优化后续职业推荐与策略 */
 export async function submitCareerFeedback(params: {
   user_id: string;
   strategy_adopted?: string | null;

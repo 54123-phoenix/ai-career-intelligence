@@ -13,7 +13,7 @@ import { TechBackground } from '@/components/ui/TechBackground';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { analyzeCareer } from '@/lib/career-api';
 import { useI18n } from '@/lib/i18n';
-import type { CareerAnalysisOutput } from '@/types/career';
+import type { T010PipelineOutput } from '@/types/t010';
 import {
   BrainCircuit,
   ChevronDown,
@@ -63,7 +63,7 @@ const SAMPLE_DATASET: Record<string, unknown>[] = [
 
 export default function DashboardPage() {
   const { t } = useI18n();
-  const [data, setData] = useState<CareerAnalysisOutput | null>(null);
+  const [data, setData] = useState<T010PipelineOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userInput, setUserInput] = useState(

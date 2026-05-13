@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { CareerAnalysisOutput } from "@/types/career";
+import type { T010PipelineOutput } from "@/types/t010";
 import { analyzeCareer } from "@/lib/career-api";
 import {
   StrategyComparison,
@@ -47,7 +47,7 @@ const SAMPLE_DATASET: Record<string, unknown>[] = [
 ];
 
 export default function AnalysisPage() {
-  const [data, setData] = useState<CareerAnalysisOutput | null>(null);
+  const [data, setData] = useState<T010PipelineOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");

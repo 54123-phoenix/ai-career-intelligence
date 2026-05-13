@@ -1,30 +1,25 @@
-/** FinalT004Schema — unified simulation response consumed by the Dashboard. */
+/** Simulation Domain Types — 职业模拟与演化 */
 
+// ── Legacy types (deprecated,保留向后兼容) ─────────────────────────────
+
+/** @deprecated — 使用 SimulationResult */
 export interface FinalT004Schema {
   simulation_id: string;
   strategy_name: string;
   outcome: "accepted" | "rejected" | "timeout";
-
-  // ProductView (UI rendering)
   summary: SummarySection;
   match_score: MatchScoreSection;
   timeline: TimelineSection;
   skill_gap_chart: SkillGapChartSection;
   recommendation_cards: RecommendationCard[];
-
-  // Explanation (interpretability)
   decision_path: DecisionPath;
   hr_reasoning: HRReasoning;
   candidate_actions: CandidateActions;
   failure_points: FailurePoint[];
   confidence_score: ConfidenceScore;
-
-  // Raw data
   result: Record<string, unknown>;
   metrics: Record<string, number>;
 }
-
-// ── ProductView sections ──────────────────────────────────────────────
 
 export interface SummarySection {
   headline: string;
@@ -90,8 +85,6 @@ export interface RecommendationCard {
   action_label?: string;
 }
 
-// ── Explanation sections ──────────────────────────────────────────────
-
 export interface DecisionPath {
   title: string;
   total_actions: number;
@@ -147,4 +140,69 @@ export interface ConfidenceScore {
     outcome_clarity: number;
   };
   interpretation: string;
+}
+
+// ── New business types ─────────────────────────────────────────────────
+
+export interface SimulationResult {
+  id: string;
+  strategyName: string;
+  outcome: 'accepted' | 'rejected' | 'timeout';
+  successProbability: number;
+  confidenceInterval: [number, number];
+  timeline: SimulationEventNew[];
+  skillGap: SkillGapItem[];
+  recommendations: string[];
+  confidenceScore: {
+    overall: number;
+    factors: Record<string, number>;
+  };
+}
+
+export interface SimulationEventNew {
+  step: number;
+  phase: string;
+  actor: string;
+  action: string;
+  reasoning: string;
+  score: number | null;
+  confidence: number;
+  timestamp: string;
+}
+
+export interface SkillGapItem {
+  skill: string;
+  userLevel: number;
+  requiredLevel: number;
+  gap: number;
+}
+
+export interface StrategyComparison {
+  comparisons: {
+    strategyName: string;
+    outcome: string;
+    successProbability: number;
+    timeToOffer: number;
+    totalReward: number;
+  }[];
+}
+
+export interface CareerPathNode {
+  id: string;
+  label: string;
+  type: string;
+  level?: number;
+  description?: string;
+}
+
+export interface CareerPathEdge {
+  source: string;
+  target: string;
+  label?: string;
+  probability?: number;
+}
+
+export interface CareerPathGraph {
+  nodes: CareerPathNode[];
+  edges: CareerPathEdge[];
 }

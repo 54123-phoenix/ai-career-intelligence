@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrainCircuit, LayoutDashboard, BarChart3, GitBranch, MessageSquare, User } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const navItems = [
   { href: '/dashboard', label: '仪表盘', icon: <LayoutDashboard size={16} /> },
@@ -20,8 +21,8 @@ export function Navbar() {
     <nav
       className={`sticky top-0 z-50 border-b backdrop-blur-xl ${
         isDashboard
-          ? 'border-slate-800/50 bg-slate-950/80'
-          : 'border-gray-200 bg-white/80'
+          ? 'border-slate-800/50 bg-slate-950/80 dark:bg-slate-950/80'
+          : 'border-gray-200 bg-white/80 dark:border-slate-800 dark:bg-slate-950/80'
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -31,35 +32,40 @@ export function Navbar() {
           </div>
           <span
             className={`text-sm font-bold ${
-              isDashboard ? 'text-slate-100' : 'text-gray-900'
+              isDashboard ? 'text-slate-100' : 'text-gray-900 dark:text-slate-100'
             }`}
           >
             AI Career Intelligence
           </span>
         </Link>
 
-        <div className="flex items-center gap-1">
-          {navItems.map((item) => {
-            const active = pathname === item.href || pathname?.startsWith(item.href + '/');
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  active
-                    ? isDashboard
-                      ? 'bg-slate-800 text-slate-100'
-                      : 'bg-indigo-50 text-indigo-700'
-                    : isDashboard
-                    ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
-                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = pathname === item.href || pathname?.startsWith(item.href + '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? isDashboard
+                        ? 'bg-slate-800 text-slate-100'
+                        : 'bg-indigo-50 text-indigo-700 dark:bg-slate-800 dark:text-cyan-400'
+                      : isDashboard
+                      ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {item.icon}
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+          <div className="ml-2 border-l border-gray-200 dark:border-slate-700 pl-2">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </nav>

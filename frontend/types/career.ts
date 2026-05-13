@@ -1,30 +1,66 @@
 /** Career Domain Types — 职业分析与模拟的业务类型定义
  *
- * 本文件从底层任务编号类型（t008/t010）重新导出业务语义类型，
- * 前端组件与页面应优先 import 此处，避免直接依赖构建产物类型。
+ * 本文件定义业务语义类型，与 T00x 解耦。
+ * 不直接 import types/t008.ts 或 types/t010.ts。
  */
 
-export type {
-  UserProfile,
-  CareerData,
-  CareerDataEntry,
-  JobRecommendation,
-  StrategyCandidate,
-  ScoredStrategy as ScoredCareerStrategy,
-  CareerPlan,
-  PlanStep,
-  VisualizationGraph,
-  SimulationFeedback,
-  FrontendData,
-  FrontendSummary,
-  StrategyComparisonData,
-  StrategyComparisonEntry,
-  ActionTimelineEntry,
-  RecommendationItem,
-  SimulationChartData,
-  SimulationChartRound,
-} from "./t008";
+export interface UserProfileSummary {
+  id: string;
+  name?: string;
+  email?: string;
+  experienceYears: number;
+  educationLevel: string;
+  skills: string[];
+  careerGoals: string[];
+  preferredLocations: string[];
+}
 
-export type {
-  T010PipelineOutput as CareerAnalysisOutput,
-} from "./t010";
+export interface JobRecommendation {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  matchScore: number;
+  requiredSkills: string[];
+  salaryRange?: [number, number] | null;
+}
+
+export interface CareerStrategy {
+  id: string;
+  name: string;
+  description: string;
+  overallScore: number;
+  dimensions: Record<string, number>;
+  isOffPath: boolean;
+}
+
+export interface CareerPlan {
+  steps: unknown[];
+}
+
+export interface SimulationSummary {
+  id: string;
+  strategyName: string;
+  outcome: string;
+  successProbability: number;
+  timeline: unknown[];
+  skillGap: unknown[];
+  recommendations: string[];
+  confidenceScore: {
+    overall: number;
+    factors: Record<string, number>;
+  };
+}
+
+export interface CareerAnalysisResult {
+  id: string;
+  status: 'success' | 'partial' | 'failed';
+  userProfile?: UserProfileSummary;
+  recommendations: JobRecommendation[];
+  strategies: CareerStrategy[];
+  plan?: CareerPlan;
+  simulationResult?: SimulationSummary;
+  generatedAt: string;
+}
+
+// CareerPathGraph is defined in types/simulation.ts
