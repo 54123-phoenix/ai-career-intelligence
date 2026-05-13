@@ -55,7 +55,8 @@ export async function analyzeCareer(
 
 /** 获取岗位推荐列表 */
 export async function getJobRecommendations(): Promise<JobRecommendation[]> {
-  return apiFetch<JobRecommendation[]>('/career/recommendations');
+  const res = await apiFetch<{ recommendations: JobRecommendation[] }>('/career/recommendations');
+  return res.recommendations || [];
 }
 
 /** 获取匹配评分 */
