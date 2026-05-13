@@ -33,18 +33,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Deprecation header middleware for legacy T00x endpoints
-    @app.middleware("http")
-    async def deprecation_middleware(request, call_next):
-        response = await call_next(request)
-        path = request.url.path
-        if path.startswith("/api/v1/career/t008") or \
-           path.startswith("/api/v1/career/t009") or \
-           path.startswith("/api/v1/career/t010"):
-            response.headers["Deprecation"] = "true"
-            response.headers["Sunset"] = "2026-12-31"
-        return response
-
     # Health check (no deps, always available)
     @app.get("/health")
     async def health() -> dict[str, str]:
@@ -93,10 +81,16 @@ def create_app() -> FastAPI:
 
     app.include_router(session_router, prefix="/api/v1/session", tags=["L3 Session"])
 
-    # T007 — career routes
-    from backend.api.routes.career import router as career_router
+    # T007 — career routes (split into 4 sub-files)
+    from backend.api.routes.analysis import router as analysis_router
+    from backend.api.routes.path import router as path_router
+    from backend.api.routes.recommendation import router as recommendation_router
+    from backend.api.routes.report import router as report_router
 
-    app.include_router(career_router, prefix="/api/v1/career", tags=["T007 Career"])
+    app.include_router(analysis_router, prefix="/api/v1/career", tags=["Career"])
+    app.include_router(path_router, prefix="/api/v1/career", tags=["Career"])
+    app.include_router(recommendation_router, prefix="/api/v1/career", tags=["Career"])
+    app.include_router(report_router, prefix="/api/v1/career", tags=["Career"])
 
     # Auth & User routes
     from backend.api.routes.auth import router as auth_router
