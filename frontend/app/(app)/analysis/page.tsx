@@ -1,16 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import type { CareerAnalysisResult } from "@/types/career";
-import type { CareerPathData } from "@/types/simulation";
-import { analyzeCareer, submitCareerFeedback, getCareerPath } from "@/lib/api/career";
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import type { CareerAnalysisResult } from '@/types/career';
+import type { CareerPathData } from '@/types/simulation';
+import { analyzeCareer, submitCareerFeedback, getCareerPath } from '@/lib/api/career';
 import {
   StrategyComparison,
   CareerPathGraph,
   SimulationFeedback,
   CareerPlanTimeline,
-} from "@/components/career";
-import SkillRadar from "@/components/analysis/SkillRadar";
+} from '@/components/career';
+
+const SkillRadar = dynamic(() => import('@/components/analysis/SkillRadar'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-64 items-center justify-center rounded-xl border bg-white dark:border-gray-700 dark:bg-slate-900">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+    </div>
+  ),
+});
 
 export default function AnalysisPage() {
   const [data, setData] = useState<CareerAnalysisResult | null>(null);
