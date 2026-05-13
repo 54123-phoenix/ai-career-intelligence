@@ -9,6 +9,7 @@ import {
   SimulationFeedback,
   CareerPlanTimeline,
 } from "@/components/career";
+import SkillRadar from "@/components/analysis/SkillRadar";
 
 export default function AnalysisPage() {
   const [data, setData] = useState<CareerAnalysisResult | null>(null);
@@ -160,6 +161,10 @@ export default function AnalysisPage() {
                     </div>
                   </div>
                 )}
+
+                <div className="md:col-span-2">
+                  <SkillRadar data={data} />
+                </div>
 
                 {data.userProfile && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
