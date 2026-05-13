@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  Settings,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuthStore } from '@/stores/authStore';
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/simulation', label: '职业模拟', icon: <GitBranch size={16} /> },
   { href: '/chat', label: 'AI助手', icon: <MessageSquare size={16} /> },
   { href: '/profile', label: '用户中心', icon: <User size={16} /> },
+  { href: '/settings', label: '设置', icon: <Settings size={16} /> },
 ];
 
 export function Navbar() {
