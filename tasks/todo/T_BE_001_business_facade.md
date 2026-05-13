@@ -1,6 +1,6 @@
 ---
 id: T-BE-001
-status: in_progress
+status: done
 assignee: architect_agent
 type: feature
 created: 2026-05-13
