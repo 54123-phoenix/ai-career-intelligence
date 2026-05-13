@@ -218,3 +218,186 @@ class SimulationEngine:
             f"Strategy '{state.strategy_name}' did not result in an offer. "
             "Consider a different strategy or target role."
         )
+
+
+# ============================================================================
+# Standalone runner — python -m backend.simulation.engine
+# ============================================================================
+
+
+def _print_separator(title: str = "", char: str = "=", width: int = 70) -> None:
+    if title:
+        side = (width - len(title) - 2) // 2
+        print(f"\n{char * side} {title} {char * side}")
+    else:
+        print(char * width)
+
+
+def _print_simulation_result(result, verbose: bool = False) -> None:
+    """Print a human-readable summary of one simulation run."""
+    from .product_view import to_product_view
+
+    pv = to_product_view(result)
+
+    _print_separator()
+    print(f"Simulation: {result.simulation_id}")
+    print(f"Strategy:   {result.strategy_name}")
+    print(f"Outcome:    {result.outcome.upper()}")
+    print(f"P(offer):   {result.success_probability:.3f}  "
+          f"CI: [{result.confidence_interval[0]:.3f}, {result.confidence_interval[1]:.3f}]")
+    print(f"Steps:      {result.final_state.step_count} / {result.final_state.max_steps}")
+    print(f"Time-to-offer: {result.time_to_offer} steps")
+    print()
+
+    # Match score summary
+    ms = pv["match_score"]
+    print(f"Match Score: {ms['overall']}% ({ms['gauge']['label']})")
+    print(f"  Skill match:     {ms['breakdown']['skill_match']}%")
+    print(f"  Experience fit:  {ms['breakdown']['experience_fit']}%")
+    print(f"  Keyword overlap: {ms['breakdown']['keyword_overlap']}%")
+    print()
+
+    # HR & Interview scores
+    scores = result.final_state.scores
+    if scores:
+        print("Gate Scores:")
+        for k, v in scores.items():
+            print(f"  {k}: {v:.3f}")
+        print()
+
+    # Recommendation
+    print(f"Recommendation: {result.recommendation}")
+
+    # Failure points (if any)
+    if verbose:
+        from .explanation import explain
+        expl = explain(result)
+        fp = expl.get("failure_points", [])
+        if fp:
+            print("\n--- Failure Points ---")
+            for pt in fp:
+                print(f"  [{pt.get('severity', '?')}] {pt.get('stage', '?')}: {pt.get('cause', '?')}")
+                print(f"    Fix: {pt.get('remediation', 'N/A')}")
+
+        # Key decisions timeline
+        kd = result.key_decisions
+        if kd:
+            print("\n--- Key Decisions ---")
+            for i, d in enumerate(kd):
+                print(f"  {i + 1}. [{d.agent_name}] {d.action}: {d.reasoning[:100]}")
+
+
+def main() -> None:
+    """Run simulation engine standalone with demo data.
+
+    Demonstrates:
+      - 10 resumes × 15 jobs with all 3 strategies
+      - Weak match (junior vs principal) → should fail
+      - Strong match (senior vs matching senior role) → should succeed
+      - All rule-based, zero LLM dependency
+    """
+    from .demo_data import JOBS, RESUMES
+
+    _print_separator("AI Career Intelligence — Simulation Engine Demo", "=", 70)
+    print(f"Resumes loaded: {len(RESUMES)}")
+    print(f"Jobs loaded:    {len(JOBS)}")
+    print(f"Strategies:     aggressive, balanced, conservative")
+    print(f"Max steps:      {MAX_STEPS}")
+    print()
+
+    engine = SimulationEngine()
+
+    # ── Demo 1: Strong match (P7 Go/K8s engineer vs ByteDance Go backend role) ──
+    _print_separator("Demo 1: Strong Match — P7 Go/K8s Engineer vs ByteDance Backend JD", "-")
+    resume = RESUMES["res-zhao-min"]
+    job = JOBS["job-bytedance-backend"]
+    print(f"Candidate: {resume.name} | Skills: {', '.join(resume.skills[:8])}...")
+    print(f"Job:       {job.title} @ {job.company} | Required: {', '.join(job.required_skills)}")
+    for strategy in ("aggressive", "balanced", "conservative"):
+        result = engine.run(resume, job, strategy=strategy)
+        _print_simulation_result(result)
+
+    # ── Demo 2: Weak match (P5 junior vs P9 principal architect role) ──
+    _print_separator("Demo 2: Weak Match — P5 Junior Engineer vs P8 Expert Architect", "-")
+    resume = RESUMES["res-zhang-wei"]
+    job = JOBS["job-ali-staff-architect"]
+    print(f"Candidate: {resume.name} | Skills: {', '.join(resume.skills)}")
+    print(f"Job:       {job.title} @ {job.company} | Required: {', '.join(job.required_skills)}")
+    for strategy in ("aggressive", "balanced", "conservative"):
+        result = engine.run(resume, job, strategy=strategy)
+        _print_simulation_result(result)
+
+    # ── Demo 3: Cross-domain match (NLP engineer vs ML Platform role) ──
+    _print_separator("Demo 3: Cross-Domain — NLP Engineer vs ML Platform Engineer", "-")
+    resume = RESUMES["res-sun-yang"]
+    job = JOBS["job-bytedance-ml-platform"]
+    print(f"Candidate: {resume.name} | Skills: {', '.join(resume.skills[:8])}...")
+    print(f"Job:       {job.title} @ {job.company} | Required: {', '.join(job.required_skills)}")
+    for strategy in ("aggressive", "balanced", "conservative"):
+        result = engine.run(resume, job, strategy=strategy)
+        _print_simulation_result(result)
+
+    # ── Demo 4: P9 expert vs matching expert role ──
+    _print_separator("Demo 4: Expert Match — P9 Principal vs Alibaba P8 Architect", "-")
+    resume = RESUMES["res-lin-tao"]
+    job = JOBS["job-ali-staff-architect"]
+    print(f"Candidate: {resume.name} | Skills: {', '.join(resume.skills[:8])}...")
+    print(f"Job:       {job.title} @ {job.company} | Required: {', '.join(job.required_skills)}")
+    for strategy in ("aggressive", "balanced", "conservative"):
+        result = engine.run(resume, job, strategy=strategy)
+        _print_simulation_result(result)
+
+    # ── Batch run: all resumes against all jobs ──
+    _print_separator(f"Batch Summary: All {len(RESUMES)} resumes × All {len(JOBS)} jobs", "-")
+    print(f"{'Resume':<20} {'Job':<35} {'Strategy':<14} {'Outcome':<10} {'P(offer)':<10} {'Steps':<7}")
+    print("-" * 96)
+    accept_count = 0
+    reject_count = 0
+    timeout_count = 0
+    total = 0
+
+    for rid, resume in RESUMES.items():
+        for jid, job in JOBS.items():
+            for strategy in ("aggressive", "balanced", "conservative"):
+                result = engine.run(resume, job, strategy=strategy)
+                total += 1
+                if result.outcome == "accepted":
+                    accept_count += 1
+                elif result.outcome == "rejected":
+                    reject_count += 1
+                else:
+                    timeout_count += 1
+                print(
+                    f"{resume.name:<20} "
+                    f"{job.title[:33]:<35} "
+                    f"{strategy:<14} "
+                    f"{result.outcome:<10} "
+                    f"{result.success_probability:<10.3f} "
+                    f"{result.final_state.step_count:<7}"
+                )
+
+    print("-" * 96)
+    print(f"TOTAL: {total} | Accepted: {accept_count} ({accept_count / total:.1%}) | "
+          f"Rejected: {reject_count} ({reject_count / total:.1%}) | "
+          f"Timeout: {timeout_count} ({timeout_count / total:.1%})")
+
+    _print_separator("Done", "=")
+    print("To run with verbose output: python -m backend.simulation.engine --verbose")
+    print("To run tests:              pytest tests/test_simulation.py -v")
+    print("To pre-compute embeddings:  python -m backend.retrieval.seed_qdrant")
+
+
+if __name__ == "__main__":
+    import sys
+
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python -m backend.simulation.engine [--verbose] [--help]")
+        print()
+        print("  --verbose    Show failure points and key decision details")
+        print("  --help       Show this message")
+        print()
+        print("Runs simulation engine standalone with demo data.")
+        print("No API server, LLM, or database dependency required.")
+        sys.exit(0)
+
+    main()
