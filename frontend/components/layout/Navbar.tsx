@@ -51,7 +51,7 @@ export function Navbar() {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
             <BrainCircuit size={18} />
           </div>
