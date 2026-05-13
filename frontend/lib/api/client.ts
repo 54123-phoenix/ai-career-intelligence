@@ -4,7 +4,7 @@
  * 负责：baseURL、auth header、JSON 处理、统一错误。
  */
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 export class ApiError extends Error {
   constructor(

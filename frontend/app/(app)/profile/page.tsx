@@ -1,15 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  getCurrentUser,
-  updateUserProfile,
-  getUserHistory,
-  type UserHistoryItem,
-} from '@/lib/api/user';
+import { useAuthStore } from '@/stores/authStore';
+import { updateUserProfile, getUserHistory, type UserHistoryItem } from '@/lib/api/user';
 import type { UserProfile } from '@/types/user';
 
 export default function ProfilePage() {
+  const authUser = useAuthStore((s) => s.user);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [history, setHistory] = useState<UserHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,27 +15,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
+      // 优先使用登录时已获取的用户信息，避免重复验证感
+      if (authUser) {
+        setProfile(authUser);
+      }
       try {
-        const [user, hist] = await Promise.all([getCurrentUser(), getUserHistory({ limit: 10 })]);
-        setProfile(user);
+        const hist = await getUserHistory({ limit: 10 });
         setHistory(hist.items);
       } catch {
-        // Fallback to demo data if API not ready
-        setProfile({
-          user_id: 'demo-user',
-          email: 'demo@example.com',
-          name: '演示用户',
-          role: 'user',
-          created_at: new Date().toISOString(),
-          career_goals: ['高级后端工程师', '技术专家'],
-          preferred_industries: ['互联网', '人工智能'],
-          preferred_locations: ['北京', '上海'],
-          salary_expectation: [300, 600],
-          privacy_level: 'basic',
-          skills: ['Python', 'FastAPI', 'PostgreSQL'],
-          experience_years: 3,
-          education_level: '本科',
-        });
         setHistory([
           {
             id: '1',
@@ -67,7 +51,7 @@ export default function ProfilePage() {
       }
     }
     load();
-  }, []);
+  }, [authUser]);
 
   async function handleSave() {
     if (!profile) return;
