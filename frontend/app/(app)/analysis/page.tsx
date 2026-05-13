@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { T010PipelineOutput } from "@/types/t010";
-import { analyzeCareer } from "@/lib/career-api";
+import type { CareerAnalysisResult } from "@/types/career";
+import { analyzeCareer } from "@/lib/api/career";
 import {
   StrategyComparison,
   CareerPathGraph,
@@ -10,44 +10,8 @@ import {
   CareerPlanTimeline,
 } from "@/components/career";
 
-const SAMPLE_DATASET: Record<string, unknown>[] = [
-  {
-    job_title: "Senior Backend Engineer",
-    required_skills: ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
-    optional_skills: ["AWS", "Terraform", "GraphQL"],
-    growth_path: ["Junior Backend", "Backend Engineer", "Senior Backend", "Staff Engineer", "Principal"],
-    level: "高级",
-    salary_range: [400, 650],
-    location: "北京",
-    industry: "互联网",
-    source: "sample",
-  },
-  {
-    job_title: "Machine Learning Engineer",
-    required_skills: ["Python", "PyTorch", "TensorFlow", "Machine Learning", "Deep Learning"],
-    optional_skills: ["Kubernetes", "MLOps", "NLP"],
-    growth_path: ["Data Analyst", "ML Engineer", "Senior MLE", "ML Architect"],
-    level: "高级",
-    salary_range: [500, 800],
-    location: "上海",
-    industry: "人工智能",
-    source: "sample",
-  },
-  {
-    job_title: "Frontend Tech Lead",
-    required_skills: ["TypeScript", "React", "Next.js", "CSS", "System Design"],
-    optional_skills: ["GraphQL", "Webpack", "React Native"],
-    growth_path: ["Frontend Developer", "Senior Frontend", "Tech Lead", "Frontend Architect"],
-    level: "高级",
-    salary_range: [450, 700],
-    location: "深圳",
-    industry: "互联网",
-    source: "sample",
-  },
-];
-
 export default function AnalysisPage() {
-  const [data, setData] = useState<T010PipelineOutput | null>(null);
+  const [data, setData] = useState<CareerAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -61,10 +25,8 @@ export default function AnalysisPage() {
     setError(null);
     try {
       const result = await analyzeCareer({
-        user_id: "demo-user",
         user_input: userInput,
-        career_dataset: SAMPLE_DATASET,
-        privacy_level: "basic",
+        depth: "standard",
       });
       setData(result.data);
     } catch (e) {
@@ -85,21 +47,21 @@ export default function AnalysisPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900">
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
         职业分析引擎
       </h1>
-      <p className="mb-6 text-sm text-gray-500">
+      <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
         解析职业画像、推荐匹配岗位、生成发展策略并模拟验证
       </p>
 
       {/* Input controls */}
-      <div className="mb-6 rounded-xl border bg-white p-4 shadow-sm">
+      <div className="mb-6 rounded-xl border bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-slate-900">
         <div className="mb-4">
-          <label className="mb-1 block text-xs text-gray-500">
+          <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
             职业目标、技能与经验
           </label>
           <textarea
-            className="w-full rounded-lg border px-3 py-2 text-sm"
+            className="w-full rounded-lg border px-3 py-2 text-sm dark:border-gray-600 dark:bg-slate-800 dark:text-white"
             rows={2}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
@@ -107,8 +69,8 @@ export default function AnalysisPage() {
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">
-            已加载 {SAMPLE_DATASET.length} 条示例职业数据
+          <span className="text-xs text-gray-400 dark:text-gray-500">
+            输入越详细，分析结果越精准
           </span>
           <button
             className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
@@ -121,7 +83,7 @@ export default function AnalysisPage() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">
           {error}
         </div>
       )}
@@ -133,34 +95,34 @@ export default function AnalysisPage() {
             <span
               className={`rounded px-2 py-0.5 text-xs font-medium ${
                 data.status === "success"
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                   : data.status === "partial"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
               }`}
             >
               {data.status === "success" ? "分析完成" : data.status === "partial" ? "部分完成" : "失败"}
             </span>
-            <span className="text-gray-400">
-              {data.job_recommendations.length} 个岗位推荐
+            <span className="text-gray-400 dark:text-gray-500">
+              {data.recommendations.length} 个岗位推荐
             </span>
-            <span className="text-gray-400">
-              {data.strategy_candidates.length} 条候选策略
+            <span className="text-gray-400 dark:text-gray-500">
+              {data.strategies.length} 条候选策略
             </span>
-            <span className="text-gray-400">
-              {data.elapsed_ms.toFixed(0)}ms
+            <span className="text-gray-400 dark:text-gray-500">
+              {new Date(data.generatedAt).toLocaleString("zh-CN")}
             </span>
           </div>
 
           {/* Tabs */}
-          <div className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1">
+          <div className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-slate-800">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   activeTab === tab.key
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-white text-gray-900 shadow-sm dark:bg-slate-700 dark:text-white"
+                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 }`}
                 onClick={() => setActiveTab(tab.key)}
               >
@@ -173,47 +135,47 @@ export default function AnalysisPage() {
           <div className="space-y-6">
             {activeTab === "overview" && (
               <div className="grid gap-6 md:grid-cols-2">
-                {!!data.frontend_data?.summary && (
-                  <div className="rounded-xl border bg-white p-6 shadow-sm md:col-span-2">
-                    <h3 className="mb-3 text-lg font-semibold">
-                      {(data.frontend_data.summary as unknown as Record<string, unknown>).headline as string}
+                {!!data.frontendData?.summary && (
+                  <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900 md:col-span-2">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      {data.frontendData.summary.headline || "职业分析概览"}
                     </h3>
                     <div className="grid gap-4 md:grid-cols-3">
                       <StatCard
                         label="岗位匹配数"
-                        value={data.job_recommendations.length}
+                        value={data.recommendations.length}
                       />
                       <StatCard
                         label="最优策略得分"
-                        value={`${((data.frontend_data.summary as unknown as Record<string, unknown>).top_strategy_score as number * 100).toFixed(0)}%`}
+                        value={`${((data.frontendData.summary.topStrategyScore || 0) * 100).toFixed(0)}%`}
                       />
                       <StatCard
                         label="模拟成功率"
-                        value={`${((data.frontend_data.summary as unknown as Record<string, unknown>).simulation_success_rate as number * 100).toFixed(0)}%`}
+                        value={`${((data.frontendData.summary.simulationSuccessRate || 0) * 100).toFixed(0)}%`}
                       />
                     </div>
                   </div>
                 )}
 
-                {data.user_profile && (
-                  <div className="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-3 text-lg font-semibold">用户画像</h3>
+                {data.userProfile && (
+                  <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">用户画像</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-500">工作经验</dt>
-                        <dd>{data.user_profile.experience_years} 年</dd>
+                        <dt className="text-gray-500 dark:text-gray-400">工作经验</dt>
+                        <dd className="text-gray-900 dark:text-gray-100">{data.userProfile.experienceYears} 年</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-500">学历</dt>
-                        <dd>{data.user_profile.education_level || "—"}</dd>
+                        <dt className="text-gray-500 dark:text-gray-400">学历</dt>
+                        <dd className="text-gray-900 dark:text-gray-100">{data.userProfile.educationLevel || "—"}</dd>
                       </div>
                       <div>
-                        <dt className="mb-1 text-gray-500">技能标签</dt>
+                        <dt className="mb-1 text-gray-500 dark:text-gray-400">技能标签</dt>
                         <dd className="flex flex-wrap gap-1">
-                          {data.user_profile.skills.map((s) => (
+                          {data.userProfile.skills.map((s) => (
                             <span
                               key={s}
-                              className="rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700"
+                              className="rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                             >
                               {s}
                             </span>
@@ -221,12 +183,12 @@ export default function AnalysisPage() {
                         </dd>
                       </div>
                       <div>
-                        <dt className="mb-1 text-gray-500">职业目标</dt>
+                        <dt className="mb-1 text-gray-500 dark:text-gray-400">职业目标</dt>
                         <dd className="flex flex-wrap gap-1">
-                          {data.user_profile.career_goals.map((g, i) => (
+                          {data.userProfile.careerGoals.map((g, i) => (
                             <span
                               key={i}
-                              className="rounded bg-green-50 px-1.5 py-0.5 text-xs text-green-700"
+                              className="rounded bg-green-50 px-1.5 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300"
                             >
                               {g}
                             </span>
@@ -237,21 +199,21 @@ export default function AnalysisPage() {
                   </div>
                 )}
 
-                {data.career_data && (
-                  <div className="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-3 text-lg font-semibold">职业数据</h3>
-                    <div className="text-sm text-gray-500 mb-3">
-                      已解析 {data.career_data.total_entries} 条数据
+                {data.careerData && (
+                  <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">职业数据</h3>
+                    <div className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                      已解析 {data.careerData.totalEntries} 条数据
                     </div>
-                    <div className="max-h-64 overflow-y-auto space-y-2">
-                      {data.career_data.entries.map((entry, i) => (
+                    <div className="max-h-64 space-y-2 overflow-y-auto">
+                      {data.careerData.entries.map((entry, i) => (
                         <div
                           key={i}
-                          className="rounded border px-3 py-2 text-sm"
+                          className="rounded border px-3 py-2 text-sm dark:border-gray-700"
                         >
-                          <div className="font-medium">{entry.job_title}</div>
-                          <div className="text-xs text-gray-400">
-                            {entry.required_skills.join(", ")}
+                          <div className="font-medium text-gray-900 dark:text-white">{entry.jobTitle}</div>
+                          <div className="text-xs text-gray-400 dark:text-gray-500">
+                            {entry.requiredSkills.join(", ")}
                           </div>
                         </div>
                       ))}
@@ -261,81 +223,73 @@ export default function AnalysisPage() {
               </div>
             )}
 
-            {activeTab === "strategies" && data.frontend_data && (
+            {activeTab === "recommendations" && (
+              <div className="space-y-4">
+                {data.recommendations.map((job) => (
+                  <div
+                    key={job.id}
+                    className="rounded-xl border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-slate-900"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{job.title}</h3>
+                      <span className="rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                        匹配度 {job.matchScore}%
+                      </span>
+                    </div>
+                    <div className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                      {job.company} · {job.location}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {job.requiredSkills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-slate-800 dark:text-gray-400"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                    {job.salaryRange && (
+                      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        薪资范围：¥{job.salaryRange[0]}K - ¥{job.salaryRange[1]}K
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {data.recommendations.length === 0 && (
+                  <div className="rounded-xl border p-12 text-center text-gray-400 dark:border-gray-700">
+                    暂无岗位推荐数据
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "strategies" && !!data.frontendData?.strategyComparison && (
               <StrategyComparison
-                data={data.frontend_data.strategy_comparison as import('@/types/t008').StrategyComparisonData}
+                data={data.frontendData.strategyComparison as any}
               />
             )}
 
             {activeTab === "plan" && (
               <CareerPlanTimeline
-                plan={data.career_plan}
-                timeline={data.frontend_data?.action_timeline as import('@/types/t008').ActionTimelineEntry[] ?? null}
+                plan={data.plan as any}
+                timeline={data.frontendData?.actionTimeline as any}
               />
             )}
 
             {activeTab === "path" && (
-              <CareerPathGraph data={data.visualization_data} />
+              <CareerPathGraph data={null} />
             )}
 
             {activeTab === "simulation" && (
-              <SimulationFeedback data={data.simulation_feedback?.base_feedback ?? null} />
-            )}
-
-            {activeTab === "recommendations" &&
-              !!data.frontend_data?.recommendations && (
-                <div className="rounded-xl border bg-white p-6 shadow-sm">
-                  <h3 className="mb-4 text-lg font-semibold">
-                    分析与建议
-                  </h3>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {(data.frontend_data.recommendations as unknown[]).map((rec: any) => (
-                      <div
-                        key={`${rec.priority}-${rec.title}`}
-                        className="rounded-lg border bg-gray-50 p-4"
-                      >
-                        <div className="mb-1 flex items-center gap-2">
-                          <span
-                            className={`rounded px-2 py-0.5 text-xs font-medium ${
-                              rec.type === "strategy"
-                                ? "bg-blue-100 text-blue-700"
-                                : rec.type === "simulation"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-orange-100 text-orange-700"
-                            }`}
-                          >
-                            {rec.type}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            P{rec.priority}
-                          </span>
-                        </div>
-                        <h4 className="font-medium text-gray-900">
-                          {rec.title}
-                        </h4>
-                        <p className="mt-1 text-sm text-gray-600">
-                          {rec.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {data.errors.length > 0 && (
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-                <div className="font-medium mb-1">提示：</div>
-                {data.errors.map((e, i) => (
-                  <div key={i}>• {e}</div>
-                ))}
-              </div>
+              <SimulationFeedback data={data.simulationResult as any} />
             )}
           </div>
         </>
       )}
 
       {!data && !loading && !error && (
-        <div className="rounded-xl border bg-white p-12 text-center text-gray-400">
+        <div className="rounded-xl border bg-white p-12 text-center text-gray-400 dark:border-gray-700 dark:bg-slate-900">
           输入您的职业目标与技能，点击“开始职业分析”获取岗位推荐与发展策略
         </div>
       )}
@@ -345,9 +299,9 @@ export default function AnalysisPage() {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg bg-gray-50 p-4 text-center">
-      <div className="text-2xl font-bold text-gray-900">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
+    <div className="rounded-lg bg-gray-50 p-4 text-center dark:bg-slate-800">
+      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
     </div>
   );
 }

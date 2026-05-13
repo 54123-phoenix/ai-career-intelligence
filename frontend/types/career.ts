@@ -61,6 +61,24 @@ export interface CareerAnalysisResult {
   plan?: CareerPlan;
   simulationResult?: SimulationSummary;
   generatedAt: string;
-}
 
-// CareerPathGraph is defined in types/simulation.ts
+  // Extended fields for transitional UI compatibility
+  // These map to legacy T010 fields and will be refactored in future phases
+  frontendData?: {
+    summary?: {
+      headline?: string;
+      topStrategyScore?: number;
+      simulationSuccessRate?: number;
+    };
+    strategyComparison?: unknown;
+    actionTimeline?: unknown[];
+    recommendationsList?: unknown[];
+  };
+  careerData?: {
+    totalEntries: number;
+    entries: Array<{
+      jobTitle: string;
+      requiredSkills: string[];
+    }>;
+  };
+}

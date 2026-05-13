@@ -1,10 +1,8 @@
 "use client";
 
-import type { CareerPlan, ActionTimelineEntry } from "@/types/t008";
-
 interface Props {
-  plan: CareerPlan | null;
-  timeline: ActionTimelineEntry[] | null;
+  plan: any;
+  timeline: any[] | null;
 }
 
 const PHASE_COLORS: Record<string, string> = {
@@ -81,7 +79,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
                 >
                   {step.phase}
                 </span>
-                {step.milestones.map((m, i) => (
+                {step.milestones.map((m: any, i: number) => (
                   <span
                     key={i}
                     className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600"
@@ -101,7 +99,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
           <div>
             <div className="mb-2 text-sm font-medium text-red-600">Risks</div>
             <ul className="space-y-1">
-              {plan.risk_points.map((risk, i) => (
+              {plan.risk_points.map((risk: any, i: number) => (
                 <li key={i} className="flex gap-2 text-sm">
                   <span className="text-red-400">•</span>
                   <span>{risk}</span>
@@ -117,7 +115,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
               Skill Gaps
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {plan.skill_gaps.map((gap) => (
+              {plan.skill_gaps.map((gap: any) => (
                 <span
                   key={gap}
                   className="rounded bg-orange-50 px-2 py-0.5 text-xs text-orange-700"

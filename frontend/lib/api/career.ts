@@ -185,5 +185,24 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
         }
       : undefined,
     generatedAt: String(data.generated_at || new Date().toISOString()),
+    frontendData: {
+      summary: {
+        headline: String(summary.headline || ''),
+        topStrategyScore: Number(summary.top_strategy_score || 0),
+        simulationSuccessRate: Number(summary.simulation_success_rate || 0),
+      },
+      strategyComparison: fd.strategy_comparison,
+      actionTimeline: (fd.action_timeline as unknown[]) || [],
+      recommendationsList: (fd.recommendations as unknown[]) || [],
+    },
+    careerData: data.career_data
+      ? {
+          totalEntries: Number((data.career_data as Record<string, unknown>).total_entries || 0),
+          entries: ((data.career_data as Record<string, unknown>).entries as Array<Record<string, unknown>> || []).map((e) => ({
+            jobTitle: String(e.job_title || ''),
+            requiredSkills: (e.required_skills as string[]) || [],
+          })),
+        }
+      : undefined,
   };
 }
