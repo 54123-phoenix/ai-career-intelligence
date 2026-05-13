@@ -1,774 +1,786 @@
-# API 契约文档
+# API 契约文档 v1.0
 
-> 由 @architect_agent 维护。所有跨模块数据交换必须遵守此文档定义的契约。
-> 版本：`1.0.0`
+> 维护者：Architect Agent。所有跨模块数据交换必须遵守此文档。
+> 版本：`1.0.0` | 生成日期：2026-05-13
 
 ---
 
-## 核心数据模型
+## 目录
 
-### StructuredResume（结构化简历）
+1. [核心数据模型](#1-核心数据模型)
+2. [API 端点总览](#2-api-端点总览)
+3. [L1 数据理解层](#3-l1-数据理解层)
+4. [L2 模拟层](#4-l2-模拟层)
+5. [L3 进化层](#5-l3-进化层)
+6. [Pipeline 编排层](#6-pipeline-编排层)
+7. [会话与追踪](#7-会话与追踪)
+8. [用户与认证](#8-用户与认证)
+9. [Chat 接口](#9-chat-接口)
+10. [错误规范](#10-错误规范)
+11. [弃用策略](#11-弃用策略)
+12. [变更日志](#12-变更日志)
 
-```python
-from pydantic import BaseModel, Field
-from typing import Literal
-from datetime import date
+---
 
-class Project(BaseModel):
-    name: str = Field(description="项目名称")
-    description: str = Field(default="", description="项目描述")
-    tech_stack: list[str] = Field(default_factory=list, description="技术栈")
-    start_date: date | None = None
-    end_date: date | None = None
+## 1. 核心数据模型
 
-class Education(BaseModel):
-    school: str
-    degree: Literal["本科", "硕士", "博士", "其他"]
-    major: str
-    graduation_year: int | None = None
+所有类型定义在 `backend/shared/types.py`。以下为契约层面描述，完整 Pydantic 定义以源码为准。
 
-class WorkExperience(BaseModel):
-    company: str
-    title: str
-    description: str = ""
-    tech_stack: list[str] = Field(default_factory=list)
-    start_date: date | None = None
-    end_date: date | None = None
+### 1.1 StructuredResume — 结构化简历
 
-class StructuredResume(BaseModel):
-    """L1 Parser 输出 → L2 Simulation / L3 Evolution 输入"""
-    resume_id: str = Field(description="全局唯一标识")
-    name: str
-    email: str | None = None
-    phone: str | None = None
-    summary: str = ""
-    skills: list[str] = Field(default_factory=list, description="标准化后的技能标签")
-    projects: list[Project] = Field(default_factory=list)
-    education: list[Education] = Field(default_factory=list)
-    experience: list[WorkExperience] = Field(default_factory=list)
-    certifications: list[str] = Field(default_factory=list)
-    skill_embedding: list[float] | None = None  # 由 Retrieval 模块填充
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "resume_id": "res-001",
-                "name": "张三",
-                "skills": ["Python", "FastAPI", "LangChain"],
-                "projects": [{"name": "AI招聘系统", "tech_stack": ["Python", "React"]}]
-            }
-        }
+```
+StructuredResume {
+    resume_id: str            # 全局唯一标识
+    name: str                 # 姓名
+    email: str|null
+    phone: str|null
+    summary: str              # 个人总结
+    skills: str[]             # 标准化技能标签
+    projects: Project[]       # 项目经历
+    education: Education[]    # 教育背景
+    experience: WorkExperience[]  # 工作经历
+    certifications: str[]     # 证书
+    skill_embedding: float[]|null  # 由 Retrieval 填充
+}
 ```
 
-### StructuredJob（结构化岗位）
+**数据流方向**：L1 Parser 产出 → L2 Simulation 消费 → L3 Evolution 消费
 
-```python
-class StructuredJob(BaseModel):
-    """L1 Parser 输出 → L2 Simulation 输入 v1.0.0"""
+### 1.2 StructuredJob — 结构化岗位
+
+```
+StructuredJob {
     job_id: str
     title: str
     company: str
-    location: str = ""
-    level: str = ""
-    description: str = ""
-
-    # Skills
-    required_skills: list[str] = Field(default_factory=list)
-    optional_skills: list[str] = Field(default_factory=list)
-
-    # Compensation
-    salary_range: tuple[int, int] | None = None  # (min, max) K/年
-
-    # Metadata
-    posted_date: date | None = None
-    job_embedding: list[float] | None = None  # 由 Retrieval 模块填充
+    location: str
+    level: str                # "初级" | "中级" | "高级" | "专家"
+    description: str
+    required_skills: str[]
+    optional_skills: str[]
+    salary_range: (int, int)|null  # (min, max) K/年
+    posted_date: date|null
+    job_embedding: float[]|null  # 由 Retrieval 填充
+}
 ```
 
-### MatchResult（匹配结果）
+### 1.3 MatchResult — 检索匹配结果
 
-```python
-class MatchResult(BaseModel):
-    """Retrieval 模块输出"""
-    item_id: str  # 对应的 job_id 或 resume_id
-    score: float = Field(ge=0.0, le=1.0, description="匹配分数")
-    payload: dict = Field(default_factory=dict, description="原始 payload")
-    match_type: Literal["resume_to_job", "job_to_resume", "skill_to_skill"]
+```
+MatchResult {
+    item_id: str              # 匹配到的 job_id 或 resume_id
+    score: float [0.0, 1.0]   # Cosine 相似度
+    payload: dict             # 匹配项关键字段
+    match_type: "resume_to_job" | "job_to_resume" | "skill_to_skill"
+}
 ```
 
-### SimulationState（模拟状态 v2.0.0）
+**Payload 约定**：
 
-**权威定义**：`backend/simulation/state.py` → `backend/shared/types.py` 重导出。
+| match_type        | 必须字段                                                   | 可选字段                              |
+|-------------------|----------------------------------------------------------|-------------------------------------|
+| `resume_to_job`   | `title`, `company`, `required_skills`                     | `optional_skills`, `salary_range`, `level`, `location` |
+| `job_to_resume`   | `name`, `skills`                                          | `summary`, `education_level`        |
+| `skill_to_skill`  | `skill_name`, `category`                                  | `market_value`                      |
 
-```python
-class AgentDecision(BaseModel):
-    """单个 Agent 在单步模拟中的决策记录"""
-    agent_name: str              # "candidate" | "hr" | "market" | "interview"
-    action: str                  # 动作动词：apply | screen | adjust | assess | accept | reject
-    params: dict                 # 动作参数
-    reasoning: str               # 可解释性理由（必填）
-    confidence: float = 0.5      # Agent 对该决策的置信度 [0, 1]
-    timestamp: str               # ISO-8601
+### 1.4 SimulationState — 模拟状态
 
-class SimulationState(BaseModel):
-    """LangGraph StateGraph 全局状态 —— 所有 Agent 的唯一读写对象"""
+```
+SimulationState {
     simulation_id: str
-    strategy_name: str = "default"  # A | B | C 策略标签
-
-    # 不可变实体
+    strategy_name: str        # "aggressive" | "conservative" | "balanced"
     candidate: StructuredResume
     job: StructuredJob
-
-    # 当前位置
-    current_step: Literal[
-        "applied", "screened", "interview", "offer", "accepted", "rejected", "end"
-    ] = "applied"
-    step_count: int = 0          # 已执行的 Agent 动作次数
-    max_steps: int = 20           # 安全上限
-
-    # 审计轨迹（追加只读）
-    decisions: list[AgentDecision] = []
-
-    # 各阶段评分
-    scores: dict[str, float] = {} # {"hr_screen": 0.8, "interview": 0.65, "final": 0.72}
-
-    # 市场上下文
-    market_adjustment: float = 1.0      # [0.5, 1.5] 供需修正
-    competition_intensity: float = 0.5   # [0, 1] 竞争强度
-
-    # 元数据
-    timestamp: str               # ISO-8601 最后更新时间
+    current_step: "applied"|"screened"|"interview"|"offer"|"accepted"|"rejected"|"end"
+    step_count: int
+    max_steps: int (=20)
+    decisions: AgentDecision[]
+    scores: {step_name: float}
+    market_adjustment: float [0.5, 1.5]
+    competition_intensity: float [0.0, 1.0]
+    timestamp: str            # ISO-8601
+}
 ```
 
-### SimulationResult（模拟结果 v2.0.0）
+### 1.5 AgentDecision — 单步决策
 
-```python
-class SimulationResult(BaseModel):
-    """一条模拟路径的最终产出 → Frontend 展示 / L3 Evolution 输入"""
+```
+AgentDecision {
+    agent_name: str           # "candidate"|"hr"|"market"|"interview"
+    action: str               # "apply"|"screen"|"adjust"|"assess"|"accept"|"reject"
+    params: dict
+    reasoning: str            # 可解释理由（必填）
+    confidence: float [0, 1]
+    timestamp: str            # ISO-8601
+}
+```
+
+### 1.6 SimulationResult — 模拟结果
+
+```
+SimulationResult {
     simulation_id: str
-    strategy_name: str = "default"
-    outcome: Literal["accepted", "rejected", "timeout"] = "timeout"
-
-    final_state: SimulationState            # 最终状态快照
-    success_probability: float              # [0, 1] 估算 P(offer)
-    confidence_interval: tuple[float, float] # (下界, 上界)
-    key_decisions: list[AgentDecision]      # 关键决策点（≤5条）
-    time_to_offer: int = 0                  # applied → offer 步数
-    path_history: list[SimulationState] = [] # 每步完整快照
-    recommendation: str = ""                # 策略建议
-```
-
----
-
-## Retrieval Layer Contracts（v1.0.0）
-
-> 本节定义 L1 Retrieval 模块的接口契约。实现由 @retrieval_agent 负责，契约由 @architect_agent 维护。
-> 实现位于 `backend/retrieval/`，所有对外接口通过 `backend/shared/types.py` 的 `MatchResult` 与上下游通信。
-
----
-
-### 1. EmbeddingService（嵌入服务接口）
-
-**职责**：将 `StructuredResume` / `StructuredJob` 转化为归一化 dense vector。
-
-**契约类型**：`typing.Protocol` —— 不规定实现（sentence-transformers / OpenAI / 其他），只规定 shape。
-
-```python
-from typing import Protocol, runtime_checkable
-
-@runtime_checkable
-class EmbeddingService(Protocol):
-    """结构化文档 → dense vector。实现者负责模型加载与缓存。"""
-
-    model_name: str        # "sentence-transformers/all-MiniLM-L6-v2"
-    dim: int               # 384
-
-    def encode_resume(self, resume: StructuredResume) -> list[float]:
-        """将简历转为归一化向量，写入 resume.skill_embedding 后返回。"""
-        ...
-
-    def encode_job(self, job: StructuredJob) -> list[float]:
-        """将岗位转为归一化向量，写入 job.job_embedding 后返回。"""
-        ...
-
-    def encode_batch(
-        self, items: list[StructuredResume | StructuredJob], item_type: str
-    ) -> list[list[float]]:
-        """批量编码。item_type ∈ {"resume", "job"}。返回顺序与输入一致。"""
-        ...
-```
-
-**文本拼接规则**（实现规范，非接口约束）：
-- Resume → `summary + " ".join(skills) + project descriptions + experience descriptions`
-- Job → `title + description + " ".join(required_skills) + " ".join(optional_skills) + level`
-
-**性能约束**：
-| 指标 | 目标 |
-|------|------|
-| 单条编码延迟 | < 100ms |
-| 批量编码吞吐 | 32 条/批次 |
-| 向量归一化 | 必须（保证 Cosine 语义正确） |
-
----
-
-### 2. VectorStore Schema（Qdrant Collection 定义）
-
-**职责**：存储向量并支持 Cosine 相似度检索。
-
-**Collection 清单**：
-
-#### `resumes`
-
-```json
-{
-  "collection_name": "resumes",
-  "vectors": {
-    "size": 384,
-    "distance": "Cosine"
-  },
-  "payload_schema": {
-    "name":       {"type": "text"},
-    "skills":     {"type": "keyword", "is_array": true},
-    "summary":    {"type": "text"},
-    "education_level": {"type": "keyword"}
-  }
+    strategy_name: str
+    outcome: "accepted"|"rejected"|"timeout"
+    final_state: SimulationState
+    success_probability: float [0, 1]
+    confidence_interval: (float, float)
+    key_decisions: AgentDecision[]  # ≤5 条
+    time_to_offer: int              # applied→offer 步数，无则为 0
+    path_history: SimulationState[]
+    recommendation: str
 }
 ```
 
-#### `jobs`
+### 1.7 FinalT004Schema — simulation/run 统一响应
 
-```json
-{
-  "collection_name": "jobs",
-  "vectors": {
-    "size": 384,
-    "distance": "Cosine"
-  },
-  "payload_schema": {
-    "title":            {"type": "text"},
-    "company":          {"type": "text"},
-    "required_skills":  {"type": "keyword", "is_array": true},
-    "optional_skills":  {"type": "keyword", "is_array": true},
-    "salary_range":     {"type": "integer", "is_array": true},
-    "level":            {"type": "keyword"},
-    "location":         {"type": "keyword"}
-  }
-}
+`simulation/run` 的实际返回类型。由 `backend/simulation/final_schema.py` 的 `build_envelope()` 构建。
+
 ```
-
-#### `skills`（L3 阶段启用）
-
-```json
 {
-  "collection_name": "skills",
-  "vectors": {
-    "size": 384,
-    "distance": "Cosine"
-  },
-  "payload_schema": {
-    "skill_name":  {"type": "keyword"},
-    "category":    {"type": "keyword"},
-    "market_value":{"type": "float"}
-  }
-}
-```
-
-**操作契约**：
-
-```python
-class VectorStore(Protocol):
-    """向量存储 —— MVP 使用 Qdrant in-memory。"""
-
-    # ── 写入 ──
-    def upsert_resume(self, resume_id: str, vector: list[float], payload: dict) -> None: ...
-    def upsert_job(self, job_id: str, vector: list[float], payload: dict) -> None: ...
-    def upsert_batch(self, collection: str, ids: list[str], vectors: list[list[float]], payloads: list[dict]) -> None: ...
-
-    # ── 检索 ──
-    def search(
-        self,
-        collection: str,             # "resumes" | "jobs" | "skills"
-        query_vector: list[float],   # dim=384 归一化向量
-        top_k: int = 10,             # 返回数量
-        score_threshold: float = 0.0,# 最低相似度阈值
-        filters: dict | None = None, # Payload 过滤条件
-    ) -> list[dict]:
-        """返回 [{id, score, payload}, ...]。score ∈ [0.0, 1.0]。"""
-        ...
-
-    # ── 生命周期 ──
-    def reset(self) -> None: ...
-```
-
-**过滤条件语法**（Qdrant 兼容）：
-
-```json
-{
-  "must": [
-    {"key": "level", "match": {"value": "高级"}},
-    {"key": "required_skills", "match": {"any": ["Python", "FastAPI"]}}
-  ]
+    simulation_id, strategy_name, outcome,
+    summary: {headline, candidate_name, job_title, company, badge, stats},
+    match_score: {overall, breakdown, gauge},
+    timeline: {events[], total_steps},
+    skill_gap_chart: {matched[], missing[], title, match_ratio},
+    recommendation_cards: [{priority, type, title, description, action_label}],
+    decision_path: {title, total_actions, steps[]},
+    hr_reasoning: {evaluation, score, verdict, details[], rejection_reasons[]},
+    candidate_actions: {strategy, strategy_explanation, total_actions, actions[]},
+    failure_points: [],
+    confidence_score: {overall, factors, interpretation},
+    result: SimulationResult,
+    metrics: {offer_probability, skill_gap_score, total_reward}
 }
 ```
 
 ---
 
-### 3. Matcher（匹配编排器）—— 输入 / 输出契约
+## 2. API 端点总览
 
-**职责**：编排 EmbeddingService + VectorStore，完成语义匹配全流程。这是 Retrieval 模块的唯一公开入口。
+| 方法   | 路由                                        | 归属       | 状态       |
+|--------|---------------------------------------------|-----------|-----------|
+| `GET`  | `/health`                                   | 基础设施     | 已实现      |
+| `POST` | `/api/v1/auth/register`                     | Auth      | MVP (内存) |
+| `POST` | `/api/v1/auth/login`                        | Auth      | MVP (内存) |
+| `GET`  | `/api/v1/users/me`                          | Auth      | MVP (内存) |
+| `PATCH`| `/api/v1/users/me`                          | Auth      | MVP (内存) |
+| `GET`  | `/api/v1/users/me/history`                  | Auth      | Mock      |
+| `POST` | `/api/v1/ingestion/ingest/{source}`         | L1        | MVP (mock源) |
+| `POST` | `/api/v1/ingestion/ingest/all`              | L1        | MVP (mock源) |
+| `GET`  | `/api/v1/ingestion/sources`                 | L1        | 已实现      |
+| `GET`  | `/api/v1/ingestion/jobs`                    | L1        | 已实现      |
+| `POST` | `/api/v1/retrieval/match`                   | L1        | 已实现      |
+| `POST` | `/api/v1/simulation/run`                    | L2        | MVP (样本数据) |
+| `GET`  | `/api/v1/simulation/samples`                | L2        | 调试辅助    |
+| `POST` | `/api/v1/feedback/review`                   | L3        | 已实现      |
+| `POST` | `/api/v1/feedback/review/batch`             | L3        | 已实现      |
+| `POST` | `/api/v1/feedback/training-samples`         | L3        | 已实现      |
+| `GET`  | `/api/v1/feedback/samples`                  | L3        | 已实现      |
+| `POST` | `/api/v1/ranking/rerank`                    | L3        | 已实现      |
+| `POST` | `/api/v1/ranking/pairs`                     | L3        | 已实现      |
+| `GET`  | `/api/v1/ranking/model/status`              | L3        | 已实现      |
+| `GET`  | `/api/v1/ranking/model/versions`            | L3        | 已实现      |
+| `POST` | `/api/v1/ranking/model/activate/{version}`  | L3        | 已实现      |
+| `POST` | `/api/v1/ranking/train`                     | L3        | 已实现      |
+| `POST` | `/api/v1/pipeline/run`                      | Pipeline  | 已实现      |
+| `GET`  | `/api/v1/pipeline/modes`                    | Pipeline  | 已实现      |
+| `GET`  | `/api/v1/pipeline/health`                   | Pipeline  | 已实现      |
+| `GET`  | `/api/v1/trace/{trace_id}`                  | Trace     | 已实现      |
+| `GET`  | `/api/v1/trace/`                            | Trace     | 已实现      |
+| `GET`  | `/api/v1/trace/{trace_id}/samples`          | Trace     | 已实现      |
+| `POST` | `/api/v1/session/start`                     | Session   | 已实现      |
+| `POST` | `/api/v1/session/action`                    | Session   | 已实现      |
+| `POST` | `/api/v1/session/end`                       | Session   | 已实现      |
+| `GET`  | `/api/v1/session/active/{user_id}`          | Session   | 已实现      |
+| `GET`  | `/api/v1/session/{session_id}`              | Session   | 已实现      |
+| `GET`  | `/api/v1/session/user/{user_id}/sessions`   | Session   | 已实现      |
+| `GET`  | `/api/v1/session/preferences/{user_id}`     | Session   | 已实现      |
+| `POST` | `/api/v1/session/run`                       | Session   | 已实现      |
+| `GET`  | `/api/v1/session/queue/status`              | Session   | 已实现      |
+| `POST` | `/api/v1/career/event`                      | Career    | 已实现      |
+| `GET`  | `/api/v1/career/timeline/{user_id}`         | Career    | 已实现      |
+| `POST` | `/api/v1/career/analyze`                    | Career    | 已实现      |
+| `POST` | `/api/v1/career/strategy`                   | Career    | 已实现      |
+| `POST` | `/api/v1/career/simulate`                   | Career    | 已实现      |
+| `GET`  | `/api/v1/career/visualize/{user_id}`        | Career    | 已实现      |
+| `POST` | `/api/v1/career/run`                        | Career    | 已实现      |
+| `GET`  | `/api/v1/career/events/{user_id}`           | Career    | 已实现      |
+| `POST` | `/api/v1/chat/message`                      | Chat      | Mock (SSE) |
 
-**契约类型**：具体类（非 Protocol），模块通过单例暴露。
+### 2.1 T008-T010 子路由（已弃用，由 Business Facade 替代）
 
-```python
-class Retriever:
-    """语义匹配编排器 —— 上游 Parser / 下游 Simulation 的唯一依赖。"""
+| 方法   | 路由                                        | 标签                  | Sunset     |
+|--------|---------------------------------------------|----------------------|------------|
+| `POST` | `/api/v1/career/t008/run`                   | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t008/parse`                 | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t008/retrieve`              | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t008/review`                | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t008/architect`             | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t008/simulate`              | T008 Career Growth    | 2026-12-31 |
+| `GET`  | `/api/v1/career/t008/frontend/{user_id}`    | T008 Career Growth    | 2026-12-31 |
+| `POST` | `/api/v1/career/t009/run`                   | T009 Career Growth V2 | 2026-12-31 |
+| `POST` | `/api/v1/career/t009/feedback`              | T009 Career Growth V2 | 2026-12-31 |
+| `GET`  | `/api/v1/career/t009/baselines`             | T009 Career Growth V2 | 2026-12-31 |
+| `POST` | `/api/v1/career/t009/trends`                | T009 Career Growth V2 | 2026-12-31 |
+| `POST` | `/api/v1/career/t010/run`                   | T010 Lightweight      | 2026-12-31 |
+| `GET`  | `/api/v1/career/t010/upgrade-interfaces`    | T010 Lightweight      | 2026-12-31 |
 
-    # ── 索引（写入侧） ──
+### 2.2 Business Facade（推荐前端使用）
 
-    async def index_resume(self, resume: StructuredResume) -> str:
-        """
-        Input:  StructuredResume（Parser 输出，skill_embedding 可选）
-        Effect: 1) 若 skill_embedding 为空则调用 EmbeddingService.encode_resume()
-                2) 写入 resumes collection
-                3) 回填 resume.skill_embedding
-        Output: resume_id: str
-        """
-        ...
-
-    async def index_job(self, job: StructuredJob) -> str:
-        """
-        Input:  StructuredJob（Parser 输出，job_embedding 可选）
-        Effect: 1) 若 job_embedding 为空则调用 EmbeddingService.encode_job()
-                2) 写入 jobs collection
-                3) 回填 job.job_embedding
-        Output: job_id: str
-        """
-        ...
-
-    async def index_jobs_batch(self, jobs: list[StructuredJob]) -> list[str]:
-        """
-        Input:  Job 列表
-        Effect: 批量编码 + 批量写入
-        Output: job_id 列表（顺序一致）
-        """
-        ...
-
-    # ── 检索（读取侧） ──
-
-    async def search_jobs(
-        self,
-        resume: StructuredResume,
-        top_k: int = 10,
-        score_threshold: float = 0.0,
-        filters: dict | None = None,
-    ) -> list[MatchResult]:
-        """
-        Input:  resume（已解析或已索引）
-                top_k（返回数量）
-                score_threshold（最低相似度）
-                filters（Qdrant payload 过滤条件）
-        Output: list[MatchResult]，按 score 降序
-        Side-effect: 若 resume.skill_embedding 为空，自动编码
-        """
-        ...
-
-    async def search_resumes(
-        self,
-        job: StructuredJob,
-        top_k: int = 10,
-        score_threshold: float = 0.0,
-        filters: dict | None = None,
-    ) -> list[MatchResult]:
-        """
-        Input:  job（已解析或已索引）
-        Output: list[MatchResult]，match_type="job_to_resume"
-        """
-        ...
-
-    # ── 生命周期 ──
-
-    def reset(self) -> None:
-        """清空所有 collection。仅用于测试或全量重建。"""
-        ...
-```
-
-**Matcher 数据流**：
-
-```
-search_jobs(resume)
-    │
-    ├─ resume.skill_embedding?
-    │   ├─ None → EmbeddingService.encode_resume(resume)
-    │   └─ Some → 直接使用
-    │
-    ├─ VectorStore.search("jobs", query_vector, top_k, score_threshold, filters)
-    │
-    └─ raw hits → [MatchResult(item_id=h.id, score=h.score, payload=h.payload, match_type="resume_to_job")]
-```
+| 方法   | 路由                                        | 描述                   |
+|--------|---------------------------------------------|------------------------|
+| `POST` | `/api/v1/career/analyze`                    | 职业综合分析（已复用）       |
+| `POST` | `/api/v1/career/resume`                     | 简历上传与解析（占位）       |
+| `POST` | `/api/v1/career/recommendations`            | 岗位推荐列表              |
+| `POST` | `/api/v1/career/match-score`                | 用户-岗位匹配度查询         |
+| `POST` | `/api/v1/career/path`                       | 职业路径图数据             |
+| `POST` | `/api/v1/career/feedback`                   | 用户反馈提交              |
+| `GET`  | `/api/v1/career/trends`                     | 行业趋势（Mock）          |
 
 ---
 
-### 4. MatchResult（匹配结果）—— 唯一输出类型
+## 3. L1 数据理解层
 
-**Pydantic 定义**（`backend/shared/types.py`，不可修改）：
+### 3.1 Data Ingestion — 外部数据采集
 
-```python
-class MatchResult(BaseModel):
-    """Retrieval 模块输出 → Simulation / Frontend 输入"""
-    item_id: str                                          # 匹配到的 job_id 或 resume_id
-    score: float = Field(ge=0.0, le=1.0)                  # Cosine 相似度
-    payload: dict = Field(default_factory=dict)           # 匹配项的关键字段
-    match_type: Literal[
-        "resume_to_job",   # search_jobs() 的结果
-        "job_to_resume",   # search_resumes() 的结果
-        "skill_to_skill",  # 技能相似度查询（L3 阶段启用）
+#### `GET /api/v1/ingestion/sources`
+
+列出已注册的数据源。
+
+**Response 200**：
+```json
+{
+    "sources": ["mock"],
+    "total": 1
+}
+```
+
+#### `POST /api/v1/ingestion/ingest/{source_name}`
+
+从指定数据源采集并标准化岗位数据。
+
+**Response 200**：
+```json
+{
+    "source": "mock",
+    "fetched": 12,
+    "normalized": 10,
+    "duplicates_skipped": 2,
+    "jobs": [
+        {
+            "job_id": "job-001",
+            "title": "Senior Backend Engineer",
+            "company": "ACME Corp",
+            "required_skills": ["Python", "FastAPI"]
+        }
     ]
+}
 ```
 
-**Payload 内容规范**（约定优于配置）：
+#### `GET /api/v1/ingestion/jobs`
 
-| match_type | payload 必须包含 | payload 可选 |
-|-----------|-----------------|-------------|
-| `resume_to_job` | `title`, `company`, `required_skills` | `optional_skills`, `salary_range`, `level`, `location` |
-| `job_to_resume` | `name`, `skills` | `summary`, `education_level` |
-| `skill_to_skill` | `skill_name`, `category` | `market_value` |
+获取已采集的岗位列表。
+
+**Query Params**：`source` (可选), `limit` (默认 100)
+
+**Response 200**：`UnifiedJob[]`
 
 ---
 
-## HTTP API 契约
+### 3.2 Retrieval — 语义检索
 
-### POST /api/v1/parser/resume
+#### `POST /api/v1/retrieval/match`
 
-**描述**：解析简历文件
-
-**Request**：
-```http
-Content-Type: multipart/form-data
-
-file: <PDF 或 Markdown 文件>
-source_type: "pdf" | "markdown" | "text"
-```
-
-**Response**：
-```json
-{
-  "resume_id": "res-001",
-  "name": "张三",
-  "skills": ["Python", "FastAPI"],
-  "projects": [...],
-  "education": [...],
-  "experience": [...]
-}
-```
-
-### POST /api/v1/retrieval/match
-
-**描述**：为简历匹配岗位（`search_jobs`）
+简历 → 岗位匹配。Pipeline：编码 → Cosine 搜索 → 缺失技能计算 → Top-K。
 
 **Request**：
 ```json
 {
-  "resume_id": "res-001",
-  "top_k": 10,
-  "score_threshold": 0.3,
-  "filters": {
-    "must": [
-      {"key": "level", "match": {"value": "高级"}},
-      {"key": "location", "match": {"value": "上海"}}
-    ]
-  }
+    "resume": { "resume_id": "res-001", "name": "...", "skills": ["Python"], ... },
+    "top_k": 10,
+    "score_threshold": 0.3
 }
 ```
 
-**Response**：
+**Response 200**：
 ```json
 {
-  "matches": [
-    {
-      "item_id": "job-042",
-      "score": 0.87,
-      "payload": {
-        "title": "后端工程师",
-        "company": "ABC科技",
-        "required_skills": ["Python", "FastAPI"],
-        "optional_skills": ["GraphQL"],
-        "salary_range": [300, 500],
-        "level": "高级",
-        "location": "上海"
-      },
-      "match_type": "resume_to_job"
-    }
-  ],
-  "query_ms": 12
-}
-```
-
-### POST /api/v1/retrieval/index/resume
-
-**描述**：索引单份简历
-
-**Request**：
-```json
-{
-  "resume_id": "res-001"
-}
-```
-
-**Response**：
-```json
-{
-  "resume_id": "res-001",
-  "indexed": true
-}
-```
-
-### POST /api/v1/retrieval/index/job
-
-**描述**：索引单个岗位
-
-**Request**：
-```json
-{
-  "job_id": "job-042"
-}
-```
-
-**Response**：
-```json
-{
-  "job_id": "job-042",
-  "indexed": true
-}
-```
-
-### POST /api/v1/retrieval/index/jobs/batch
-
-**描述**：批量索引岗位
-
-**Request**：
-```json
-{
-  "job_ids": ["job-001", "job-002", "job-003"]
-}
-```
-
-**Response**：
-```json
-{
-  "indexed_count": 3,
-  "job_ids": ["job-001", "job-002", "job-003"]
-}
-```
-
-### POST /api/v1/retrieval/search/resumes
-
-**描述**：反向搜索——给定岗位，检索最匹配候选人
-
-**Request**：
-```json
-{
-  "job_id": "job-042",
-  "top_k": 10,
-  "score_threshold": 0.3,
-  "filters": {
-    "must": [
-      {"key": "skills", "match": {"any": ["Python", "Kubernetes"]}}
-    ]
-  }
-}
-```
-
-**Response**：
-```json
-{
-  "matches": [
-    {
-      "item_id": "res-001",
-      "score": 0.87,
-      "payload": {
-        "name": "张三",
-        "skills": ["Python", "FastAPI", "Kubernetes"]
-      },
-      "match_type": "job_to_resume"
-    }
-  ],
-  "query_ms": 8
-}
-```
-
-### POST /api/v1/simulation/run
-
-**描述**：运行单路径模拟。返回 FinalT004Schema — ProductView（UI 渲染） + Explanation（可解释分析） + 原始数据。
-
-**Request**：
-```json
-{
-  "resume_id": "res-001",
-  "job_id": "job-042",
-  "strategy": "balanced"
-}
-```
-
-**Response**（FinalT004Schema v1.0.0）：
-```json
-{
-  "simulation_id": "sim-789abc",
-  "strategy_name": "balanced",
-  "outcome": "accepted",
-
-  "summary": {
-    "headline": "Offer accepted after 3 steps",
-    "candidate_name": "Alice Wang",
-    "job_title": "Senior Backend Engineer",
-    "company": "ACME Corp",
-    "badge": "success",
-    "stats": {
-      "success_probability": 0.8,
-      "time_to_offer_steps": 3,
-      "total_reward": 0.99
-    }
-  },
-
-  "match_score": {
-    "overall": 100,
-    "breakdown": {"skill_match": 100, "experience_fit": 97, "keyword_overlap": 100},
-    "gauge": {"value": 100, "color": "green", "label": "Strong"}
-  },
-
-  "timeline": {
-    "events": [
-      {
-        "step": 0, "phase": "applied", "actor": "candidate",
-        "action_label": "Applied to position",
-        "reasoning": "Skill match 100% exceeds threshold 60%.",
-        "score": null, "confidence": 0.65, "timestamp": "2025-01-15T..."
-      }
+    "matches": [
+        {
+            "item_id": "job-001",
+            "score": 0.87,
+            "payload": {
+                "title": "Senior Backend Engineer",
+                "company": "ACME Corp",
+                "required_skills": ["Python", "FastAPI"],
+                "level": "高级",
+                "location": "上海"
+            },
+            "match_type": "resume_to_job"
+        }
     ],
-    "total_steps": 3
-  },
-
-  "skill_gap_chart": {
-    "matched": [{"name": "Python", "value": 100, "category": "required"}],
-    "missing": [{"name": "Terraform", "value": 40, "category": "optional"}],
-    "title": "Skill Match: 86%",
-    "match_ratio": 0.86
-  },
-
-  "recommendation_cards": [
-    {
-      "priority": 1, "type": "success",
-      "title": "Proceed with Application",
-      "description": "The 'balanced' strategy led to an offer.",
-      "action_label": "Apply now"
-    }
-  ],
-
-  "decision_path": {
-    "title": "Successful 'balanced' strategy — offer accepted",
-    "total_actions": 4,
-    "steps": [
-      {"order": 1, "agent": "candidate", "action": "apply",
-       "summary": "Candidate decided to apply for the position.",
-       "reasoning": "...", "confidence": 0.65}
-    ]
-  },
-
-  "hr_reasoning": {
-    "evaluation": "HR screen: PASS. Score=0.97...",
-    "score": 0.969, "verdict": "passed",
-    "details": ["Skill match: 100%", "Experience fit: 88%", "Keyword overlap: 100%"],
-    "rejection_reasons": []
-  },
-
-  "candidate_actions": {
-    "strategy": "balanced",
-    "strategy_explanation": "Candidate balanced preparation with timely applications.",
-    "total_actions": 3,
-    "actions": [
-      {"action": "apply", "confidence": 0.65, "reasoning": "...", "gap_skills": [], "match_score": 1.0}
-    ]
-  },
-
-  "failure_points": [],
-
-  "confidence_score": {
-    "overall": 0.88,
-    "factors": {"data_richness": 1.0, "gate_coverage": 1.0, "outcome_clarity": 1.0},
-    "interpretation": "High — explanation is well-supported by simulation data."
-  },
-
-  "result": {"...": "SimulationResult.model_dump()"},
-  "metrics": {"offer_probability": 1.0, "skill_gap_score": 1.0, "total_reward": 0.99}
+    "query_ms": 12.5
 }
 ```
 
-**Schema 结构**：
+**错误**：
+- `422` — `resume` 字段不符合 `StructuredResume` schema
 
-```
-FinalT004Schema {
-    simulation_id, strategy_name, outcome          ← identity
+---
 
-    // ProductView (UI rendering) — T-004-A
-    summary, match_score, timeline,
-    skill_gap_chart, recommendation_cards
+## 4. L2 模拟层
 
-    // Explanation (interpretability) — T-004-B
-    decision_path, hr_reasoning, candidate_actions,
-    failure_points, confidence_score
+### 4.1 Simulation — 多 Agent 博弈
 
-    // Backward-compatible raw data
-    result: SimulationResult, metrics: dict
-}
-```
+#### `POST /api/v1/simulation/run`
 
-### POST /api/v1/simulation/compare
-
-**描述**：多策略对比模拟
+运行单路径招聘模拟。引擎：CandidateAgent + HRAgent + 状态机。返回 FinalT004Schema。
 
 **Request**：
 ```json
 {
-  "resume_id": "res-001",
-  "job_id": "job-042",
-  "strategies": ["aggressive", "conservative", "balanced"]
+    "resume_id": "res-001",
+    "job_id": "job-001",
+    "strategy": "balanced"
 }
 ```
 
-**Response**：
+| 参数        | 类型   | 默认值       | 可选值                                      |
+|------------|--------|-------------|-------------------------------------------|
+| resume_id  | str    | 必填         | `res-001`, `res-002`, `res-003` (MVP)     |
+| job_id     | str    | 必填         | `job-001`, `job-002`, `job-003` (MVP)     |
+| strategy   | str    | `"balanced"` | `"aggressive"`, `"conservative"`, `"balanced"` |
+
+**Response 200**：`FinalT004Schema` — 参见 [1.7 节](#17-finalt004schema--simulationrun-统一响应)
+
+**错误**：
+- `404` — `resume_id` 或 `job_id` 不在样本库中。返回可用 ID 列表。
+- `422` — 参数类型或枚举值不合法
+
+**当前限制**：使用内存中的 3 份样本简历和 3 个样本岗位，未对接 Parser/Retrieval 的实际数据。
+
+#### `GET /api/v1/simulation/samples`
+
+列出可用的样本 resume / job ID（调试用）。
+
+**Response 200**：
 ```json
 {
-  "comparison": [
-    {
-      "strategy_name": "aggressive",
-      "outcome": "accepted",
-      "success_probability": 0.65,
-      "time_to_offer": 3,
-      "total_reward": 0.72
-    },
-    {
-      "strategy_name": "conservative",
-      "outcome": "accepted",
-      "success_probability": 0.8,
-      "time_to_offer": 5,
-      "total_reward": 0.99
-    },
-    {
-      "strategy_name": "balanced",
-      "outcome": "accepted",
-      "success_probability": 0.8,
-      "time_to_offer": 3,
-      "total_reward": 0.99
-    }
-  ]
+    "resumes": {"res-001": "Alice Wang", "res-002": "Bob Zhang", "res-003": "Carol Li"},
+    "jobs": {"job-001": "Senior Backend Engineer @ ACME Corp", ...}
 }
 ```
 
 ---
 
-## 变更日志
+## 5. L3 进化层
 
-| 版本 | 日期 | 变更内容 | 影响模块 |
-|------|------|---------|---------|
-| 1.0.0 | 2025-XX-XX | 初始版本 | 全部 |
-| 1.1.0 | 2025-XX-XX | 新增 Retrieval Layer Contracts（EmbeddingService / VectorStore / Retriever 接口 + Qdrant schema） | Retrieval, Parser（索引依赖）, Simulation（匹配结果消费） |
-| 1.2.0 | 2025-XX-XX | StructuredJob 字段重构：`skills_required`→`required_skills`，新增 `optional_skills`，`salary_min/max`→`salary_range` | Parser, Retrieval, Simulation |
-| 2.0.0 | 2025-XX-XX | FinalT004Schema：合并 ProductView + Explanation → 统一 simulation/run 响应。新增 10 个 UI/分析 section，保留 result/metrics 向后兼容。 | Simulation, Frontend |
+### 5.1 Feedback — 反馈采集与审阅
+
+#### `POST /api/v1/feedback/review`
+
+审阅单次模拟结果，生成 FeedbackEntry（含 retrieval_reward、ranking_penalty、bias_flags）。
+
+**Request**：
+```json
+{
+    "simulation_result": { ... },
+    "retrieval_matches": []
+}
+```
+
+**Response 200**：
+```json
+{
+    "entry_id": "fe-...",
+    "simulation_id": "sim-...",
+    "retrieval_reward": 0.85,
+    "ranking_penalty": 0.0,
+    "combined_signal": 0.85,
+    "bias_flags": []
+}
+```
+
+#### `POST /api/v1/feedback/review/batch`
+
+批量审阅。返回 FeedbackAggregate（逐条 review + 批次级偏置检测）。
+
+**Response 200**：
+```json
+{
+    "batch_id": "fb-...",
+    "entries": [ ... ],
+    "summary": { "avg_signal": 0.78, "total_flagged": 1 },
+    "bias_findings": []
+}
+```
+
+#### `POST /api/v1/feedback/training-samples`
+
+从 review + simulation 输出生成 LTR 训练数据集。过滤低质量样本（label < 0.1 或空 feature）。
+
+**Response 200**：`TrainingSample[]`
+
+#### `GET /api/v1/feedback/samples?limit=50`
+
+获取本会话累积的 training samples。
+
+---
+
+### 5.2 Ranking — LTR 排序
+
+#### `POST /api/v1/ranking/rerank`
+
+对检索候选集应用排序模型。无训练模型时返回 identity 结果。
+
+**Request**：
+```json
+{
+    "trace_id": "trace-...",
+    "candidates": [
+        {"item_id": "job-001", "score": 0.87, "payload": {...}, "match_type": "resume_to_job"}
+    ],
+    "user_profile": { ... },
+    "interaction_history": []
+}
+```
+
+**Response 200**：`RerankedCandidate[]`
+
+#### `POST /api/v1/ranking/pairs`
+
+从用户行为日志生成 pairwise 排序样本。规则：clicked > skipped, saved > clicked。禁止 self-pair。
+
+**Response 200**：`RankingPair[]`
+
+#### `GET /api/v1/ranking/model/status`
+
+```json
+{
+    "active": true,
+    "model": { ... },
+    "versions_count": 3
+}
+```
+
+#### `GET /api/v1/ranking/model/versions`
+
+`TrainedRankerModel[]` — 所有已存储模型版本，最新优先。
+
+#### `POST /api/v1/ranking/model/activate/{version}`
+
+激活指定版本用于 rerank。
+
+**错误**：`404` — 版本号不存在
+
+#### `POST /api/v1/ranking/train`
+
+离线批量训练排序模型。可指定 `from_recent_traces` 从最近 trace 提取 pairs。
+
+**Request**：
+```json
+{
+    "pairs": [],
+    "validation_split": 0.2,
+    "from_recent_traces": true,
+    "days": 7
+}
+```
+
+---
+
+## 6. Pipeline 编排层
+
+### 6.1 Pipeline — 统一执行入口
+
+#### `POST /api/v1/pipeline/run`
+
+执行完整多 Agent 闭环流水线。返回 InteractionTrace — 链接所有阶段输出的统一追踪记录。
+
+**Request**：
+```json
+{
+    "user_query": "",
+    "user_embedding": null,
+    "filters": null,
+    "mode": null,
+    "interaction_history": null,
+    "user_id": null,
+    "session_id": null
+}
+```
+
+| 参数                 | 类型             | 描述                                          |
+|----------------------|-----------------|-----------------------------------------------|
+| `user_query`         | str             | 自然语言搜索查询                                  |
+| `user_embedding`     | float[]\|null   | 预计算的查询向量                                  |
+| `filters`            | dict\|null      | `{"location": "北京", "skill": "Python"}`       |
+| `mode`               | str\|null       | 不填=Architect 自动选择；填=强制模式                 |
+| `interaction_history`| list\|null      | 用户行为日志（RANKING 模式使用）                     |
+| `user_id`            | str\|null       | 用户标识（SESSION 模式使用）                        |
+| `session_id`         | str\|null       | 已有会话 ID（SESSION 模式使用）                     |
+
+**执行模式**：
+
+| 模式       | Pipeline                                                | 触发条件                       |
+|-----------|---------------------------------------------------------|-------------------------------|
+| `fast`    | 缓存检索 → 最小模拟 → review → feedback                     | 热缓存，简单查询                   |
+| `full`    | retrieval → simulation → review → feedback              | 正常操作，复杂查询                  |
+| `fallback`| 降级：缓存或纯 API，跳过 simulation                          | 核心服务降级                      |
+| `ranking` | retrieval → feature_build → rerank → review → pair_build | 训练模型可用 + 用户行为数据可用         |
+| `session` | session_track → aggregate → update_prefs → retrieval → rerank → review → feedback_queue → feedback | 用户会话 + 动态偏好需求             |
+| `career`  | parse → retrieve → review → architect → simulate → frontend | 长期职业分析                      |
+
+**Response 200**：`InteractionTrace`
+```json
+{
+    "trace_id": "trace-...",
+    "mode": "full",
+    "user_query": "...",
+    "retrieved_candidates": [ ... ],
+    "simulation_results": [ ... ],
+    "training_samples": [ ... ],
+    "errors": [],
+    "elapsed_ms": 1234.5
+}
+```
+
+**错误**：`500` — Pipeline 执行异常（含详情 message）
+
+#### `GET /api/v1/pipeline/modes`
+
+列出所有可用模式和描述。
+
+#### `GET /api/v1/pipeline/health`
+
+流水线健康检查。返回各服务状态（`ok` / `degraded`）。
+
+---
+
+## 7. 会话与追踪
+
+### 7.1 Session — 用户会话
+
+#### `POST /api/v1/session/start`
+```json
+// Request
+{"user_id": "usr-abc"}
+
+// Response 200
+{"session_id": "sess-...", "user_id": "usr-abc", "is_active": true}
+```
+自动结束该用户已有的活跃会话。
+
+#### `POST /api/v1/session/action`
+```json
+// Request
+{
+    "session_id": "sess-...",
+    "action": {
+        "action_type": "query",
+        "query_text": "Python 后端岗位",
+        "timestamp": "2026-05-13T12:00:00Z"
+    }
+}
+
+// Response 200
+{"session": {...}, "summary": {"total_actions": 5, "top_skills": ["Python"], ...}}
+```
+
+#### `POST /api/v1/session/end`
+```json
+// Request  {"user_id": "usr-abc"}
+// Response 200  Session 对象
+```
+**错误**：`404` — 无活跃会话
+
+#### `GET /api/v1/session/active/{user_id}`
+
+获取当前活跃会话。无则自动创建。
+
+#### `GET /api/v1/session/{session_id}`
+
+获取指定会话详情。**错误**：`404` — 不存在
+
+#### `GET /api/v1/session/user/{user_id}/sessions?limit=20`
+
+列出用户最近会话。
+
+#### `GET /api/v1/session/preferences/{user_id}`
+
+```json
+{
+    "preferences": {"preferred_skills": ["Python"], ...},
+    "session_summary": {...},
+    "session_count": 12,
+    "shift_score": 0.15
+}
+```
+
+#### `POST /api/v1/session/run`
+
+执行完整 SESSION 流水线（8 阶段）。
+
+#### `GET /api/v1/session/queue/status`
+
+```json
+{"pending_events": 42, "max_events": 10000}
+```
+
+---
+
+### 7.2 Trace — 交互追踪
+
+#### `GET /api/v1/trace/{trace_id}`
+
+获取完整 InteractionTrace。**错误**：`404` — 不存在或已过期。
+
+#### `GET /api/v1/trace/?limit=50`
+
+列出最近 trace 摘要（trace_id, mode, query, candidates_count, elapsed_ms）。
+
+#### `GET /api/v1/trace/{trace_id}/samples`
+
+仅获取某 trace 的 training samples。
+
+---
+
+## 8. 用户与认证
+
+当前为 MVP 内存实现。生产环境需替换为数据库 + bcrypt + JWT。
+
+### 8.1 Auth
+
+#### `POST /api/v1/auth/register`
+
+```json
+// Request
+{"email": "user@example.com", "password": "****", "name": "张三"}
+
+// Response 200
+{
+    "token": "sess-...",
+    "user": {
+        "user_id": "usr-abc12345",
+        "email": "user@example.com",
+        "name": "张三",
+        "skills": [],
+        "career_goals": [],
+        "privacy_level": "basic"
+    }
+}
+```
+**错误**：`400` — 邮箱已注册
+
+#### `POST /api/v1/auth/login`
+
+```json
+// Request  {"email": "user@example.com", "password": "****"}
+// Response 200  {"token": "...", "user": {...}}
+```
+**错误**：`401` — 邮箱或密码无效
+
+### 8.2 User Profile
+
+所有 User 路由需 Bearer Token 认证（`Authorization: Bearer <token>`）。
+
+#### `GET /api/v1/users/me`
+
+获取当前用户信息。**错误**：`401` — 未认证
+
+#### `PATCH /api/v1/users/me`
+
+更新用户信息。
+```json
+// Request
+{
+    "name": "张三（更新）",
+    "skills": ["Python", "Go"],
+    "experience_years": 5
+}
+```
+
+#### `GET /api/v1/users/me/history?page=1&limit=20`
+
+用户操作历史（当前为 Mock 数据）。
+
+---
+
+## 9. Chat 接口
+
+#### `POST /api/v1/chat/message`
+
+AI 职业助手 — SSE 流式响应。
+
+**Request**：
+```json
+{
+    "message": "我想转行做 AI 工程师",
+    "conversation_id": null,
+    "context": null
+}
+```
+
+**Response**：`Content-Type: text/plain; charset=utf-8` + `Transfer-Encoding: chunked`
+
+流式传输 UTF-8 文本块，客户端逐块解码拼接。
+
+**当前状态**：Mock 实现，返回预制中文建议文本。`backend/shared/llm_client.py` 已提供 `register_llm()` 注入点，生产环境替换 `_mock_stream()` 即可。
+
+---
+
+## 10. 错误规范
+
+所有错误响应格式：
+
+```json
+{
+    "detail": "人类可读的错误描述"
+}
+```
+
+| 状态码 | 含义       | 触发场景                     |
+|--------|-----------|----------------------------|
+| `400`  | 请求错误    | 缺少必要字段、邮箱已注册、事件列表为空  |
+| `401`  | 未认证      | 缺少或无效 Bearer Token       |
+| `404`  | 资源不存在   | resume/job/session/trace ID 无效 |
+| `422`  | 参数校验失败 | Pydantic 模型验证不通过          |
+| `500`  | 服务器错误   | Pipeline 异常、Agent 执行失败    |
+
+---
+
+## 11. 弃用策略
+
+以下端点已在响应头中标记 `Deprecation: true` + `Sunset: 2026-12-31`（由 `main.py` 的 `deprecation_middleware` 统一注入）：
+
+- `* /api/v1/career/t008/*` — 由 Business Facade 替代
+- `* /api/v1/career/t009/*` — 由 Business Facade 替代
+- `* /api/v1/career/t010/*` — 由 Business Facade 替代
+
+前端应在 Sunset 日期前迁移至 Business Facade 端点（`/api/v1/career/analyze`, `/recommendations`, `/match-score`, `/path`, `/feedback`）。
+
+---
+
+## 12. 变更日志
+
+| 版本   | 日期       | 变更内容                                                      |
+|--------|-----------|---------------------------------------------------------------|
+| 1.0.0  | 2026-05-13 | 初始完整版本：覆盖全部 12 个路由模块、7 个核心数据模型、Business Facade、错误规范、弃用策略 |
+
+### 模块契约索引
+
+| 模块          | 源码路径                        | 契约定义位置                |
+|--------------|------------------------------|---------------------------|
+| L1 Parser    | `backend/parser/`             | StructuredResume/Job in shared/types.py |
+| L1 Ingestion | `backend/data_ingestion/`     | 本节 3.1                   |
+| L1 Retrieval | `backend/retrieval/`          | 本节 3.2                   |
+| L2 Simulation| `backend/simulation/`         | 本节 4.1                   |
+| L3 Feedback  | `backend/feedback/`           | 本节 5.1                   |
+| L3 Ranking   | `backend/ranking/`            | 本节 5.2                   |
+| Pipeline     | `backend/pipeline/`           | 本节 6.1                   |
+| Session      | `backend/session/`            | 本节 7.1                   |
+| Trace        | `backend/signal_layer/`       | 本节 7.2                   |
+| Auth         | `backend/api/routes/auth.py`  | 本节 8                     |
+| Chat         | `backend/api/routes/chat.py`  | 本节 9                     |
+| Career       | `backend/career/`             | 本节 2.2                   |
