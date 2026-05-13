@@ -1,333 +1,301 @@
-/** @deprecated — Dashboard 旧版页面，保留向后兼容。将在 Phase 6 重构为业务概览仪表盘。 */
 'use client';
 
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ActOneInput } from '@/components/dashboard/ActOneInput';
-import { ActTwoStrategy } from '@/components/dashboard/ActTwoStrategy';
-import { ActThreeSimulation } from '@/components/dashboard/ActThreeSimulation';
-import { NodeDetailDrawer } from '@/components/dashboard/NodeDetailDrawer';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
-import { AnalysisLoading } from '@/components/ui/AnalysisLoading';
-import { TechBackground } from '@/components/ui/TechBackground';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
-import { analyzeCareer } from '@/lib/career-api';
-import { useI18n } from '@/lib/i18n';
-import type { T010PipelineOutput } from '@/types/t010';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useAuthStore } from '@/stores/authStore';
+import { useCareerStore } from '@/stores/careerStore';
+import { getUserHistory, type UserHistoryItem } from '@/lib/api/user';
 import {
-  BrainCircuit,
-  ChevronDown,
-  Play,
-  RotateCcw,
+  BarChart3,
+  GitBranch,
+  MessageSquare,
   Zap,
-  Shield,
-  Clock,
-  Cpu,
+  TrendingUp,
+  Award,
+  Calendar,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
-const SAMPLE_DATASET: Record<string, unknown>[] = [
-  {
-    job_title: 'Senior Backend Engineer',
-    required_skills: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Kubernetes'],
-    optional_skills: ['AWS', 'Terraform', 'GraphQL'],
-    growth_path: ['Junior Backend', 'Backend Engineer', 'Senior Backend', 'Staff Engineer'],
-    level: '高级',
-    salary_range: [400, 650],
-    location: '北京',
-    industry: '互联网',
-    source: 'sample',
-  },
-  {
-    job_title: 'Machine Learning Engineer',
-    required_skills: ['Python', 'PyTorch', 'TensorFlow', 'Machine Learning', 'Deep Learning'],
-    optional_skills: ['Kubernetes', 'MLOps', 'NLP'],
-    growth_path: ['Data Analyst', 'ML Engineer', 'Senior MLE', 'ML Architect'],
-    level: '高级',
-    salary_range: [500, 800],
-    location: '上海',
-    industry: '人工智能',
-    source: 'sample',
-  },
-  {
-    job_title: 'Frontend Tech Lead',
-    required_skills: ['TypeScript', 'React', 'Next.js', 'CSS', 'System Design'],
-    optional_skills: ['GraphQL', 'Webpack', 'React Native'],
-    growth_path: ['Frontend Developer', 'Senior Frontend', 'Tech Lead', 'Frontend Architect'],
-    level: '高级',
-    salary_range: [450, 700],
-    location: '深圳',
-    industry: '互联网',
-    source: 'sample',
-  },
-];
-
 export default function DashboardPage() {
-  const { t } = useI18n();
-  const [data, setData] = useState<T010PipelineOutput | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [userInput, setUserInput] = useState(
-    '目标成为高级后端工程师，掌握 Python、FastAPI、PostgreSQL，有3年经验，本科，期望在北京工作'
-  );
-  const [activeStrategyIndex, setActiveStrategyIndex] = useState(0);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [demoStage, setDemoStage] = useState(0);
-  const [dataSource, setDataSource] = useState<'api' | 'mock' | null>(null);
+  const user = useAuthStore((s) => s.user);
+  const history = useCareerStore((s) => s.history);
+  const [recentActivity, setRecentActivity] = useState<UserHistoryItem[]>([]);
+  const [activityLoading, setActivityLoading] = useState(true);
 
-  const handleRun = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setData(null);
-    setDemoStage(0);
-    setDataSource(null);
-    try {
-      const result = await analyzeCareer({
-        user_id: 'demo-user',
-        user_input: userInput,
-        career_dataset: SAMPLE_DATASET,
-        privacy_level: 'basic',
-      });
-      setData(result.data);
-      setDataSource(result.source);
-      setDemoStage(1);
-      setTimeout(() => setDemoStage(2), 800);
-      setTimeout(() => setDemoStage(3), 1600);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  }, [userInput]);
-
-  const handleReset = useCallback(() => {
-    setData(null);
-    setError(null);
-    setDemoStage(0);
-    setActiveStrategyIndex(0);
-    setSelectedNode(null);
-    setDataSource(null);
+  useEffect(() => {
+    getUserHistory({ limit: 5 })
+      .then((res) => setRecentActivity(res.items))
+      .catch(() => {})
+      .finally(() => setActivityLoading(false));
   }, []);
 
-  const statusColor =
-    data?.status === 'success'
-      ? 'text-neon-green'
-      : data?.status === 'partial'
-      ? 'text-neon-orange'
-      : 'text-neon-red';
+  const skillCount = user?.skills?.length ?? 0;
+  const analysisCount = history.length;
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-20">
-      <TechBackground />
+    <div className="space-y-8">
+      {/* Welcome */}
+      <section>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          欢迎回来，{user?.name || '用户'} 👋
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          这里是您的职业发展仪表盘，查看分析结果、运行模拟或咨询 AI 助手。
+        </p>
+      </section>
 
-      {/* Dashboard Toolbar */}
-      <div className="border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            {data && (
-              <div className="hidden items-center gap-3 text-xs sm:flex">
-                <span className={`flex items-center gap-1 font-medium ${statusColor}`}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                  {data.status}
-                </span>
-                <span className="text-slate-500">|</span>
-                <span className="text-slate-400">
-                  <Clock size={12} className="mr-1 inline" />
-                  {data.elapsed_ms.toFixed(0)}ms
-                </span>
-                <span className="text-slate-500">|</span>
-                <span className="text-slate-400">
-                  <Zap size={12} className="mr-1 inline" />
-                  {data.strategy_candidates.length} {t('status.candidates')}
-                </span>
-                {dataSource === 'mock' && (
-                  <>
-                    <span className="text-slate-500">|</span>
-                    <span className="flex items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-amber-500/20">
-                      <Cpu size={10} />
-                      {t('nav.demoBadge')}
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+      {/* Stats Grid */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={<BarChart3 size={18} />}
+          label="职业分析"
+          value={analysisCount}
+          sub="次已完成"
+          color="indigo"
+        />
+        <StatCard
+          icon={<Award size={18} />}
+          label="技能标签"
+          value={skillCount}
+          sub="项已记录"
+          color="emerald"
+        />
+        <StatCard
+          icon={<TrendingUp size={18} />}
+          label="职业目标"
+          value={user?.career_goals?.length ?? 0}
+          sub="个目标"
+          color="amber"
+        />
+        <StatCard
+          icon={<Calendar size={18} />}
+          label="近期活动"
+          value={recentActivity.length}
+          sub="条记录"
+          color="rose"
+        />
+      </section>
 
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            {data ? (
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-700/50 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800"
-              >
-                <RotateCcw size={12} />
-                {t('nav.reset')}
-              </button>
-            ) : (
-              <button
-                onClick={handleRun}
-                disabled={loading}
-                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-neon-cyan to-neon-blue px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40 disabled:opacity-50"
-              >
-                <Play size={12} />
-                {loading ? t('nav.running') : t('nav.quickRun')}
-              </button>
-            )}
-          </div>
+      {/* Quick Actions */}
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          快捷入口
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <QuickActionCard
+            href="/analysis"
+            icon={<Sparkles size={20} />}
+            title="职业分析"
+            desc="解析画像、推荐岗位、生成策略"
+            color="indigo"
+          />
+          <QuickActionCard
+            href="/simulation"
+            icon={<GitBranch size={20} />}
+            title="职业模拟"
+            desc="运行模拟、对比策略、评估路径"
+            color="emerald"
+          />
+          <QuickActionCard
+            href="/chat"
+            icon={<MessageSquare size={20} />}
+            title="AI 助手"
+            desc="职业建议问答与策略讨论"
+            color="amber"
+          />
         </div>
-      </div>
+      </section>
 
-      {/* Main Content */}
-      <main className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pt-6">
-        {/* Hero */}
-        {!data && !loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="py-12 text-center"
-          >
-            <motion.div
-              className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-neon-cyan/20 to-neon-blue/20 ring-1 ring-cyan-500/20"
-              animate={{
-                boxShadow: [
-                  '0 0 0px rgba(6,182,212,0)',
-                  '0 0 30px rgba(6,182,212,0.2)',
-                  '0 0 0px rgba(6,182,212,0)',
-                ],
-              }}
-              transition={{ repeat: Infinity, duration: 3 }}
+      {/* Recent Activity + Skills */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Activity */}
+        <section className="rounded-xl border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-slate-900">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900 dark:text-white">最近活动</h2>
+            <Link
+              href="/profile"
+              className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
             >
-              <BrainCircuit size={32} className="text-neon-cyan" />
-            </motion.div>
-            <h2 className="mb-2 text-3xl font-bold text-gradient-cyan">
-              {t('hero.title')}
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-slate-400">
-              {t('hero.description')}
+              查看全部 <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {activityLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-10 animate-pulse rounded bg-gray-100 dark:bg-slate-800" />
+              ))}
+            </div>
+          ) : recentActivity.length === 0 ? (
+            <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+              暂无活动记录，开始您的第一次职业分析吧
             </p>
-            <div className="mt-6 flex justify-center gap-2">
-              <button
-                onClick={handleRun}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-blue px-6 py-3 text-sm font-bold text-white shadow-xl shadow-cyan-500/20 transition-all hover:scale-105 hover:shadow-cyan-500/40"
-              >
-                <Play size={16} />
-                {t('hero.startBtn')}
-              </button>
+          ) : (
+            <div className="space-y-2">
+              {recentActivity.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm dark:border-gray-700"
+                >
+                  <div className="flex items-center gap-2">
+                    <ActivityIcon type={item.type} />
+                    <span className="text-gray-900 dark:text-white">{item.title}</span>
+                    <span className="text-xs text-gray-400">{item.description}</span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(item.created_at).toLocaleDateString('zh-CN')}
+                  </span>
+                </div>
+              ))}
             </div>
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="mt-12 text-slate-600"
-            >
-              <ChevronDown size={20} className="mx-auto" />
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <GlassCard glow="red" className="border-red-500/30 bg-red-500/5">
-                <div className="text-sm text-red-300">{error}</div>
-              </GlassCard>
-            </motion.div>
           )}
-        </AnimatePresence>
+        </section>
 
-        {/* Pipeline Loading */}
-        <AnimatePresence>
-          {loading && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="flex min-h-[60vh] items-center justify-center py-8"
+        {/* Skills & Profile Summary */}
+        <section className="rounded-xl border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-slate-900">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900 dark:text-white">我的技能</h2>
+            <Link
+              href="/profile"
+              className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
             >
-              <div className="w-full">
-                <AnalysisLoading />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              编辑资料 <ArrowRight size={12} />
+            </Link>
+          </div>
 
-        {/* Act I */}
-        {demoStage >= 1 && (
-          <ActOneInput
-            userInput={userInput}
-            setUserInput={setUserInput}
-            onRun={handleRun}
-            loading={loading}
-            profile={data?.user_profile ?? null}
-          />
-        )}
-
-        {/* Divider */}
-        {demoStage >= 2 && (
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.8 }}
-            className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent"
-          />
-        )}
-
-        {/* Act II */}
-        {demoStage >= 2 && (
-          <ActTwoStrategy
-            data={data}
-            activeStrategyIndex={activeStrategyIndex}
-            setActiveStrategyIndex={setActiveStrategyIndex}
-            onNodeClick={setSelectedNode}
-          />
-        )}
-
-        {/* Divider */}
-        {demoStage >= 3 && (
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.8 }}
-            className="h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"
-          />
-        )}
-
-        {/* Act III */}
-        {demoStage >= 3 && <ActThreeSimulation data={data} />}
-
-        {/* Footer stats */}
-        {data && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="border-t border-slate-800/50 pt-6 text-center"
-          >
-            <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
-              <span>
-                {t('status.generated')}: <span className="font-mono text-slate-400">{new Date(data.generated_at).toLocaleTimeString()}</span>
-              </span>
-              <span>
-                {t('status.elapsed')}: <span className="font-mono text-slate-400">{data.elapsed_ms.toFixed(0)}ms</span>
-              </span>
-              {dataSource === 'mock' && (
-                <span className="rounded bg-amber-500/10 px-2 py-0.5 text-amber-400 ring-1 ring-amber-500/20">
-                  {t('status.demoMode')}
+          {skillCount === 0 ? (
+            <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+              尚未记录技能标签，前往用户中心添加
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {user?.skills?.map((skill) => (
+                <span
+                  key={skill}
+                  className="rounded-lg bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300"
+                >
+                  {skill}
                 </span>
-              )}
+              ))}
             </div>
-          </motion.div>
-        )}
-      </main>
+          )}
 
-      {/* Node Detail Modal */}
-      <NodeDetailDrawer nodeName={selectedNode} data={data} onClose={() => setSelectedNode(null)} />
+          {user?.career_goals && user.career_goals.length > 0 && (
+            <div className="mt-4">
+              <h3 className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">职业目标</h3>
+              <div className="flex flex-wrap gap-2">
+                {user.career_goals.map((goal) => (
+                  <span
+                    key={goal}
+                    className="rounded-lg bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  >
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  sub: string;
+  color: 'indigo' | 'emerald' | 'amber' | 'rose';
+}) {
+  const colorMap = {
+    indigo: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300',
+    emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300',
+    amber: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300',
+    rose: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300',
+  };
+
+  return (
+    <div className="rounded-xl border bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-slate-900">
+      <div className="mb-2 flex items-center gap-2">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorMap[color]}`}>
+          {icon}
+        </div>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-gray-900 dark:text-white">{value}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{sub}</span>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionCard({
+  href,
+  icon,
+  title,
+  desc,
+  color,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  color: 'indigo' | 'emerald' | 'amber';
+}) {
+  const colorMap = {
+    indigo: 'hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/20',
+    emerald: 'hover:border-emerald-300 hover:bg-emerald-50/50 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/20',
+    amber: 'hover:border-amber-300 hover:bg-amber-50/50 dark:hover:border-amber-800 dark:hover:bg-amber-950/20',
+  };
+
+  return (
+    <Link
+      href={href}
+      className={`group flex items-start gap-3 rounded-xl border bg-white p-4 shadow-sm transition-colors dark:border-gray-700 dark:bg-slate-900 ${colorMap[color]}`}
+    >
+      <div className="mt-0.5 text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white">
+        {icon}
+      </div>
+      <div>
+        <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{desc}</p>
+      </div>
+      <ArrowRight
+        size={16}
+        className="ml-auto mt-1 text-gray-300 transition-colors group-hover:text-gray-500 dark:text-gray-600 dark:group-hover:text-gray-300"
+      />
+    </Link>
+  );
+}
+
+function ActivityIcon({ type }: { type: UserHistoryItem['type'] }) {
+  const map: Record<string, { icon: React.ReactNode; bg: string }> = {
+    analysis: {
+      icon: <BarChart3 size={12} className="text-indigo-600 dark:text-indigo-400" />,
+      bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+    },
+    simulation: {
+      icon: <GitBranch size={12} className="text-emerald-600 dark:text-emerald-400" />,
+      bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    },
+    chat: {
+      icon: <MessageSquare size={12} className="text-amber-600 dark:text-amber-400" />,
+      bg: 'bg-amber-50 dark:bg-amber-950/30',
+    },
+    profile_update: {
+      icon: <Zap size={12} className="text-rose-600 dark:text-rose-400" />,
+      bg: 'bg-rose-50 dark:bg-rose-950/30',
+    },
+  };
+  const config = map[type] || map.profile_update;
+  return <div className={`flex h-6 w-6 items-center justify-center rounded-full ${config.bg}`}>{config.icon}</div>;
 }

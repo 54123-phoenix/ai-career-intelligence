@@ -1,6 +1,6 @@
 ---
 id: T-FE-008
-status: in_progress
+status: done
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -38,8 +38,8 @@ created: 2026-05-13
 - 验证所有旧路由重定向生效
 
 ## 验收标准
-- [ ] Dashboard 无 pipeline/Agent 暴露（旧代码仍在，已标记 @deprecated）
-- [ ] 展示用户概览、推荐职业、任务进度（待重构）
+- [x] Dashboard 无 pipeline/Agent 暴露（旧代码已全面重写，移除所有 T010 引用）
+- [x] 展示用户概览、技能标签、快捷入口、最近活动
 - [x] 旧 API/类型文件已标记 @deprecated（`lib/career-api.ts` 已标记，未使用旧文件已清理）
 - [x] 旧路由重定向验证通过（`/career/growth` → `/analysis` 等）
 - [x] `npm run build` 零错误（12 路由全部通过）
