@@ -40,7 +40,8 @@ created: 2026-05-13
 ## 验收标准
 - [x] Dashboard 无 pipeline/Agent 暴露（旧代码已全面重写，移除所有 T010 引用）
 - [x] 展示用户概览、技能标签、快捷入口、最近活动
-- [x] 旧 API/类型文件已标记 @deprecated（`lib/career-api.ts` 已标记，未使用旧文件已清理）
+- [x] 旧 API/类型文件已标记 @deprecated（`lib/career-api.ts` 已标记）
+- [x] 未使用旧组件已清理（`components/dashboard/*`、`components/charts/*` 已全部删除）
 - [x] 旧路由重定向验证通过（`/career/growth` → `/analysis` 等）
 - [x] `npm run build` 零错误（12 路由全部通过）
 - [ ] `npm run lint` 零警告（未执行）
