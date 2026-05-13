@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserProfile } from '@/types/user';
 import { loginUser, registerUser, getCurrentUser } from '@/lib/api/user';
+import { setCookie, deleteCookie } from '@/lib/cookie';
 
 interface AuthState {
   user: UserProfile | null;
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { token, user } = await loginUser({ email, password });
           localStorage.setItem('aci_token', token);
+          setCookie('aci_token', token);
           set({ user, token, isAuthenticated: true, isLoading: false });
         } catch (err) {
           set({ isLoading: false });
@@ -39,6 +41,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { token, user } = await registerUser({ email, password, name });
           localStorage.setItem('aci_token', token);
+          setCookie('aci_token', token);
           set({ user, token, isAuthenticated: true, isLoading: false });
         } catch (err) {
           set({ isLoading: false });
@@ -48,6 +51,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         localStorage.removeItem('aci_token');
+        deleteCookie('aci_token');
         set({ user: null, token: null, isAuthenticated: false });
       },
 

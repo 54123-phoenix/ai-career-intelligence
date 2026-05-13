@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
+import os
+
 # ---------------------------------------------------------------------------
 # Embedding config
 # ---------------------------------------------------------------------------
+# Local fallback model (sentence-transformers)
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
+
+# DashScope (primary for pre-computed embeddings per Constraint 3)
+DASHSCOPE_MODEL = os.getenv("DASHSCOPE_EMBEDDING_MODEL", "text-embedding-v2")
+DASHSCOPE_DIM = 1536
+DASHSCOPE_DIM_V3 = 1024
+
+def get_dashscope_dim() -> int:
+    return DASHSCOPE_DIM_V3 if "v3" in DASHSCOPE_MODEL else DASHSCOPE_DIM
+
 BATCH_SIZE = 32
 
 # ---------------------------------------------------------------------------
