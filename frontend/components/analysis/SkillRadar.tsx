@@ -57,7 +57,13 @@ export default function SkillRadar({ data }: Props) {
       },
       splitArea: {
         areaStyle: {
-          color: ['rgba(99, 102, 241, 0.05)', 'rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.15)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.25)'],
+          color: [
+            'rgba(99, 102, 241, 0.05)',
+            'rgba(99, 102, 241, 0.1)',
+            'rgba(99, 102, 241, 0.15)',
+            'rgba(99, 102, 241, 0.2)',
+            'rgba(99, 102, 241, 0.25)',
+          ],
         },
       },
       axisLine: {
@@ -93,9 +99,7 @@ export default function SkillRadar({ data }: Props) {
 
   return (
     <div className="rounded-xl border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-slate-900">
-      <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-white">
-        职业匹配雷达图
-      </h3>
+      <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-white">职业匹配雷达图</h3>
       <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
         {topJob
           ? `基于您与「${topJob.title}」岗位的匹配分析`
@@ -109,7 +113,8 @@ export default function SkillRadar({ data }: Props) {
       {topJob && (
         <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>
-            最优匹配岗位: <span className="font-medium text-gray-900 dark:text-white">{topJob.title}</span>
+            最优匹配岗位:{' '}
+            <span className="font-medium text-gray-900 dark:text-white">{topJob.title}</span>
           </span>
           <span>匹配度: {topJob.matchScore}%</span>
         </div>

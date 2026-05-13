@@ -43,7 +43,12 @@ const MarkdownContent = memo(function MarkdownContent({ content }: { content: st
           </blockquote>
         ),
         a: ({ children, href }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 underline"
+          >
             {children}
           </a>
         ),
@@ -67,8 +72,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content:
-        '您好！我是您的职业智能助手。可以为您解答职业发展、技能提升、岗位匹配等方面的问题。',
+      content: '您好！我是您的职业智能助手。可以为您解答职业发展、技能提升、岗位匹配等方面的问题。',
     },
   ]);
   const [input, setInput] = useState('');
@@ -121,9 +125,7 @@ export default function ChatPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-        AI 职业助手
-      </h1>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">AI 职业助手</h1>
       <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
         提供职业建议问答、策略讨论与路径规划支持
       </p>

@@ -41,12 +41,16 @@ export default function LoginPage() {
             <BrainCircuit size={24} />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">欢迎回来</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">登录您的 AI Career Intelligence 账户</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            登录您的 AI Career Intelligence 账户
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">邮箱</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              邮箱
+            </label>
             <input
               type="email"
               required
@@ -57,7 +61,9 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">密码</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              密码
+            </label>
             <input
               type="password"
               required
@@ -85,7 +91,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-slate-400">
           还没有账户？{' '}
-          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-cyan-400">
+          <Link
+            href="/register"
+            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-cyan-400"
+          >
             立即注册
           </Link>
         </p>

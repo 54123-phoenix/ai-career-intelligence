@@ -1,8 +1,8 @@
 /** @deprecated — 本文件保留向后兼容，新代码请使用 lib/api/simulation.ts */
 
-import type { FinalT004Schema } from "@/types/simulation";
+import type { FinalT004Schema } from '@/types/simulation';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export async function runSimulation(params: {
   resume_id: string;
@@ -10,12 +10,12 @@ export async function runSimulation(params: {
   strategy?: string;
 }): Promise<FinalT004Schema> {
   const res = await fetch(`${BASE}/simulation/run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       resume_id: params.resume_id,
       job_id: params.job_id,
-      strategy: params.strategy || "balanced",
+      strategy: params.strategy || 'balanced',
     }),
   });
   if (!res.ok) {

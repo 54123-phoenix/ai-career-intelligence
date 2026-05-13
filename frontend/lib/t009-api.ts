@@ -1,8 +1,8 @@
 /** T009 API client — typed wrappers around /api/v1/career/t009 endpoints */
 
-import type { T009PipelineOutput } from "@/types/t009";
+import type { T009PipelineOutput } from '@/types/t009';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export interface T009RunRequest {
   user_id?: string;
@@ -13,12 +13,10 @@ export interface T009RunRequest {
   previous_feedback?: Record<string, unknown> | null;
 }
 
-export async function runT009Pipeline(
-  params: T009RunRequest,
-): Promise<T009PipelineOutput> {
+export async function runT009Pipeline(params: T009RunRequest): Promise<T009PipelineOutput> {
   const res = await fetch(`${BASE}/career/t009/run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) {
@@ -41,11 +39,11 @@ export interface T009FeedbackRequest {
 }
 
 export async function submitT009Feedback(
-  params: T009FeedbackRequest,
+  params: T009FeedbackRequest
 ): Promise<{ received: boolean; feedback_id: string; feedback_loop: Record<string, unknown> }> {
   const res = await fetch(`${BASE}/career/t009/feedback`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) {
@@ -66,8 +64,8 @@ export async function listT009Baselines(): Promise<{
 
 export async function analyzeT009Trends(params: T009RunRequest) {
   const res = await fetch(`${BASE}/career/t009/trends`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

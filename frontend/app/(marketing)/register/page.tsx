@@ -47,7 +47,9 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">姓名</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              姓名
+            </label>
             <input
               type="text"
               required
@@ -58,7 +60,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">邮箱</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              邮箱
+            </label>
             <input
               type="email"
               required
@@ -69,7 +73,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">密码</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-300">
+              密码
+            </label>
             <input
               type="password"
               required
@@ -97,7 +103,10 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-slate-400">
           已有账户？{' '}
-          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-cyan-400">
+          <Link
+            href="/login"
+            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-cyan-400"
+          >
             立即登录
           </Link>
         </p>

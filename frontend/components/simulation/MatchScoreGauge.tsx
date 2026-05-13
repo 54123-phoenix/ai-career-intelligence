@@ -1,9 +1,9 @@
-import type { MatchScoreSection } from "@/types/simulation";
+import type { MatchScoreSection } from '@/types/simulation';
 
 const ringColors: Record<string, string> = {
-  green: "stroke-green-500",
-  yellow: "stroke-yellow-500",
-  red: "stroke-red-500",
+  green: 'stroke-green-500',
+  yellow: 'stroke-yellow-500',
+  red: 'stroke-red-500',
 };
 
 export function MatchScoreGauge({ data }: { data: MatchScoreSection }) {
@@ -20,7 +20,11 @@ export function MatchScoreGauge({ data }: { data: MatchScoreSection }) {
           <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
             <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="12" />
             <circle
-              cx="50" cy="50" r="40" fill="none" strokeWidth="12"
+              cx="50"
+              cy="50"
+              r="40"
+              fill="none"
+              strokeWidth="12"
               strokeLinecap="round"
               className={ringColors[data.gauge.color]}
               strokeDasharray={circumference}

@@ -26,14 +26,14 @@ export default function AnalysisPage() {
   const [pathData, setPathData] = useState<CareerPathData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [activeTab, setActiveTab] = useState<string>('overview');
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const [userInput, setUserInput] = useState(
-    "目标成为高级后端工程师，掌握 Python、FastAPI、PostgreSQL，有3年经验，本科，期望在北京工作"
+    '目标成为高级后端工程师，掌握 Python、FastAPI、PostgreSQL，有3年经验，本科，期望在北京工作'
   );
 
   async function handleRun() {
@@ -44,33 +44,31 @@ export default function AnalysisPage() {
       const [result, path] = await Promise.all([
         analyzeCareer({
           user_input: userInput,
-          depth: "standard",
+          depth: 'standard',
         }),
         getCareerPath(userInput).catch(() => null),
       ]);
       setData(result.data);
       setPathData(path);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }
 
   const tabs = [
-    { key: "overview", label: "概览" },
-    { key: "recommendations", label: "职业推荐" },
-    { key: "strategies", label: "策略对比" },
-    { key: "plan", label: "职业规划" },
-    { key: "path", label: "技能路径" },
-    { key: "simulation", label: "模拟验证" },
+    { key: 'overview', label: '概览' },
+    { key: 'recommendations', label: '职业推荐' },
+    { key: 'strategies', label: '策略对比' },
+    { key: 'plan', label: '职业规划' },
+    { key: 'path', label: '技能路径' },
+    { key: 'simulation', label: '模拟验证' },
   ];
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-        职业分析引擎
-      </h1>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">职业分析引擎</h1>
       <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
         解析职业画像、推荐匹配岗位、生成发展策略并模拟验证
       </p>
@@ -98,7 +96,7 @@ export default function AnalysisPage() {
             onClick={handleRun}
             disabled={loading}
           >
-            {loading ? "分析中..." : "开始职业分析"}
+            {loading ? '分析中...' : '开始职业分析'}
           </button>
         </div>
       </div>
@@ -115,14 +113,18 @@ export default function AnalysisPage() {
           <div className="mb-4 flex items-center gap-4 text-sm">
             <span
               className={`rounded px-2 py-0.5 text-xs font-medium ${
-                data.status === "success"
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                  : data.status === "partial"
-                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                data.status === 'success'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                  : data.status === 'partial'
+                    ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
               }`}
             >
-              {data.status === "success" ? "分析完成" : data.status === "partial" ? "部分完成" : "失败"}
+              {data.status === 'success'
+                ? '分析完成'
+                : data.status === 'partial'
+                  ? '部分完成'
+                  : '失败'}
             </span>
             <span className="text-gray-400 dark:text-gray-500">
               {data.recommendations.length} 个岗位推荐
@@ -131,7 +133,7 @@ export default function AnalysisPage() {
               {data.strategies.length} 条候选策略
             </span>
             <span className="text-gray-400 dark:text-gray-500">
-              {new Date(data.generatedAt).toLocaleString("zh-CN")}
+              {new Date(data.generatedAt).toLocaleString('zh-CN')}
             </span>
           </div>
 
@@ -142,8 +144,8 @@ export default function AnalysisPage() {
                 key={tab.key}
                 className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   activeTab === tab.key
-                    ? "bg-white text-gray-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-slate-700 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
                 onClick={() => setActiveTab(tab.key)}
               >
@@ -154,18 +156,15 @@ export default function AnalysisPage() {
 
           {/* Tab content */}
           <div className="space-y-6">
-            {activeTab === "overview" && (
+            {activeTab === 'overview' && (
               <div className="grid gap-6 md:grid-cols-2">
                 {!!data.frontendData?.summary && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900 md:col-span-2">
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      {data.frontendData.summary.headline || "职业分析概览"}
+                      {data.frontendData.summary.headline || '职业分析概览'}
                     </h3>
                     <div className="grid gap-4 md:grid-cols-3">
-                      <StatCard
-                        label="岗位匹配数"
-                        value={data.recommendations.length}
-                      />
+                      <StatCard label="岗位匹配数" value={data.recommendations.length} />
                       <StatCard
                         label="最优策略得分"
                         value={`${((data.frontendData.summary.topStrategyScore || 0) * 100).toFixed(0)}%`}
@@ -184,15 +183,21 @@ export default function AnalysisPage() {
 
                 {data.userProfile && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">用户画像</h3>
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      用户画像
+                    </h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <dt className="text-gray-500 dark:text-gray-400">工作经验</dt>
-                        <dd className="text-gray-900 dark:text-gray-100">{data.userProfile.experienceYears} 年</dd>
+                        <dd className="text-gray-900 dark:text-gray-100">
+                          {data.userProfile.experienceYears} 年
+                        </dd>
                       </div>
                       <div className="flex justify-between">
                         <dt className="text-gray-500 dark:text-gray-400">学历</dt>
-                        <dd className="text-gray-900 dark:text-gray-100">{data.userProfile.educationLevel || "—"}</dd>
+                        <dd className="text-gray-900 dark:text-gray-100">
+                          {data.userProfile.educationLevel || '—'}
+                        </dd>
                       </div>
                       <div>
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">技能标签</dt>
@@ -226,7 +231,9 @@ export default function AnalysisPage() {
 
                 {data.careerData && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">职业数据</h3>
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      职业数据
+                    </h3>
                     <div className="mb-3 text-sm text-gray-500 dark:text-gray-400">
                       已解析 {data.careerData.totalEntries} 条数据
                     </div>
@@ -236,9 +243,11 @@ export default function AnalysisPage() {
                           key={i}
                           className="rounded border px-3 py-2 text-sm dark:border-gray-700"
                         >
-                          <div className="font-medium text-gray-900 dark:text-white">{entry.jobTitle}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {entry.jobTitle}
+                          </div>
                           <div className="text-xs text-gray-400 dark:text-gray-500">
-                            {entry.requiredSkills.join(", ")}
+                            {entry.requiredSkills.join(', ')}
                           </div>
                         </div>
                       ))}
@@ -248,7 +257,7 @@ export default function AnalysisPage() {
               </div>
             )}
 
-            {activeTab === "recommendations" && (
+            {activeTab === 'recommendations' && (
               <div className="space-y-4">
                 {data.recommendations.map((job) => (
                   <div
@@ -289,29 +298,25 @@ export default function AnalysisPage() {
               </div>
             )}
 
-            {activeTab === "strategies" && !!data.frontendData?.strategyComparison && (
-              <StrategyComparison
-                data={data.frontendData.strategyComparison}
-              />
+            {activeTab === 'strategies' && !!data.frontendData?.strategyComparison && (
+              <StrategyComparison data={data.frontendData.strategyComparison} />
             )}
 
-            {activeTab === "plan" && (
+            {activeTab === 'plan' && (
               <CareerPlanTimeline
                 plan={data.plan ?? null}
                 timeline={data.frontendData?.actionTimeline ?? null}
               />
             )}
 
-            {activeTab === "path" && (
-              <CareerPathGraph data={pathData} />
-            )}
+            {activeTab === 'path' && <CareerPathGraph data={pathData} />}
 
-            {activeTab === "simulation" && (
+            {activeTab === 'simulation' && (
               <SimulationFeedback data={data.simulationResult ?? null} />
             )}
 
             {/* Feedback */}
-            {data.status === "success" && (
+            {data.status === 'success' && (
               <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
                 <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                   分析反馈
@@ -328,7 +333,7 @@ export default function AnalysisPage() {
                       key={star}
                       onClick={() => setRating(star)}
                       className={`text-xl transition-colors ${
-                        star <= rating ? "text-yellow-400" : "text-gray-300 dark:text-gray-600"
+                        star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                       }`}
                     >
                       ★
@@ -352,11 +357,11 @@ export default function AnalysisPage() {
                         rating,
                         comments: comment,
                       });
-                      setFeedbackMessage("感谢您的反馈！");
+                      setFeedbackMessage('感谢您的反馈！');
                       setRating(0);
-                      setComment("");
+                      setComment('');
                     } catch (e) {
-                      setFeedbackMessage(e instanceof Error ? e.message : "提交失败");
+                      setFeedbackMessage(e instanceof Error ? e.message : '提交失败');
                     } finally {
                       setFeedbackLoading(false);
                       setTimeout(() => setFeedbackMessage(null), 4000);
@@ -365,7 +370,7 @@ export default function AnalysisPage() {
                   disabled={feedbackLoading || !rating}
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
-                  {feedbackLoading ? "提交中..." : "提交反馈"}
+                  {feedbackLoading ? '提交中...' : '提交反馈'}
                 </button>
               </div>
             )}

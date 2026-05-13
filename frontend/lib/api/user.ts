@@ -28,19 +28,14 @@ export async function getCurrentUser(): Promise<UserProfile> {
   return apiFetch<UserProfile>('/users/me');
 }
 
-export async function updateUserProfile(
-  profile: Partial<UserProfile>
-): Promise<UserProfile> {
+export async function updateUserProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
   return apiFetch<UserProfile>('/users/me', {
     method: 'PATCH',
     body: JSON.stringify(profile),
   });
 }
 
-export async function getUserHistory(params?: {
-  page?: number;
-  limit?: number;
-}): Promise<{
+export async function getUserHistory(params?: { page?: number; limit?: number }): Promise<{
   items: UserHistoryItem[];
   total: number;
 }> {

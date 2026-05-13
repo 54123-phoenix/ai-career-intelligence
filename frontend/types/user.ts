@@ -5,7 +5,7 @@ export interface UserAccount {
   email: string;
   name: string;
   avatar?: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   created_at: string;
 }
 
@@ -14,7 +14,7 @@ export interface UserPreferences {
   preferred_industries: string[];
   preferred_locations: string[];
   salary_expectation: [number, number] | null;
-  privacy_level: "none" | "basic" | "full";
+  privacy_level: 'none' | 'basic' | 'full';
 }
 
 export interface UserProfile extends UserAccount, UserPreferences {

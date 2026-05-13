@@ -1,14 +1,23 @@
 /** T010 TypeScript types — Lightweight core layer, upgrade-ready. */
 
 import type {
-  UserProfile, CareerData, JobRecommendation, StrategyCandidate,
-  CareerPlan, VisualizationGraph,
-} from "./t008";
+  UserProfile,
+  CareerData,
+  JobRecommendation,
+  StrategyCandidate,
+  CareerPlan,
+  VisualizationGraph,
+} from './t008';
 import type {
-  BaselineStrategy, OffPathFlag, DiversityMetric, DynamicWeights,
-  ScoredStrategyV2, PrivacyMask, FeedbackLoopState,
+  BaselineStrategy,
+  OffPathFlag,
+  DiversityMetric,
+  DynamicWeights,
+  ScoredStrategyV2,
+  PrivacyMask,
+  FeedbackLoopState,
   T009SimulationFeedback,
-} from "./t009";
+} from './t009';
 
 export interface UpgradeInterface {
   agent: string;
@@ -20,7 +29,7 @@ export interface UpgradeInterface {
 
 export interface T010PipelineOutput {
   execution_id: string;
-  status: "success" | "partial" | "failed";
+  status: 'success' | 'partial' | 'failed';
   errors: string[];
 
   // Stage 1

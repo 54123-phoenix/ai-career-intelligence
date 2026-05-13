@@ -1,11 +1,22 @@
 /** T009 TypeScript types — aligned with backend/career/t009_schemas.py */
 
 import type {
-  UserProfile, CareerData, CareerDataEntry, JobRecommendation,
-  StrategyCandidate, CareerPlan, PlanStep, SkillNode, TimelineNode,
-  VisualizationGraph, SimulationRound, SimulationFeedback, ActionTimelineEntry,
-  StrategyComparisonData, FrontendSummary,
-} from "./t008";
+  UserProfile,
+  CareerData,
+  CareerDataEntry,
+  JobRecommendation,
+  StrategyCandidate,
+  CareerPlan,
+  PlanStep,
+  SkillNode,
+  TimelineNode,
+  VisualizationGraph,
+  SimulationRound,
+  SimulationFeedback,
+  ActionTimelineEntry,
+  StrategyComparisonData,
+  FrontendSummary,
+} from './t008';
 
 // ── T009 Parser Output ────────────────────────────────────────────────────
 
@@ -31,8 +42,13 @@ export interface BaselineStrategy {
 
 export interface OffPathFlag {
   strategy_id: string;
-  flag_type: "skill_order_anomaly" | "timeline_deviation" | "role_skip" | "industry_jump" | "salary_mismatch";
-  severity: "low" | "medium" | "high";
+  flag_type:
+    | 'skill_order_anomaly'
+    | 'timeline_deviation'
+    | 'role_skip'
+    | 'industry_jump'
+    | 'salary_mismatch';
+  severity: 'low' | 'medium' | 'high';
   description: string;
   deviation_score: number;
   recommendation: string;
@@ -71,7 +87,7 @@ export interface IndustryTrend {
   trend_id: string;
   domain: string;
   trend_name: string;
-  direction: "rising" | "stable" | "declining";
+  direction: 'rising' | 'stable' | 'declining';
   confidence: number;
   affected_skills: string[];
   affected_roles: string[];
@@ -94,7 +110,7 @@ export interface PrivacyMask {
   mask_personal_info: boolean;
   mask_company_names: boolean;
   mask_salary: boolean;
-  anonymization_level: "none" | "basic" | "full";
+  anonymization_level: 'none' | 'basic' | 'full';
   masked_fields: string[];
 }
 
@@ -124,7 +140,7 @@ export interface UserFeedback {
   time_spent_sections: Record<string, number>;
   comments: string;
   preferences_updated: Record<string, unknown>;
-  privacy_level: "none" | "basic" | "full";
+  privacy_level: 'none' | 'basic' | 'full';
 }
 
 // ── T009 Simulation Output ────────────────────────────────────────────────
@@ -142,7 +158,7 @@ export interface T009SimulationFeedback {
 
 export interface T009PipelineOutput {
   execution_id: string;
-  status: "success" | "partial" | "failed";
+  status: 'success' | 'partial' | 'failed';
   errors: string[];
 
   // Stage 1

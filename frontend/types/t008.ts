@@ -92,9 +92,14 @@ export interface ReviewerOutput {
 
 // ── Architect Agent Output ────────────────────────────────────────────────
 
-export type PlanPhase = "preparation" | "application" | "interview" | "negotiation" | "onboarding";
-export type SkillLevel = "beginner" | "intermediate" | "advanced" | "expert";
-export type TimelineEventType = "skill_acquisition" | "application" | "interview" | "offer" | "milestone";
+export type PlanPhase = 'preparation' | 'application' | 'interview' | 'negotiation' | 'onboarding';
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+export type TimelineEventType =
+  | 'skill_acquisition'
+  | 'application'
+  | 'interview'
+  | 'offer'
+  | 'milestone';
 
 export interface PlanStep {
   step_number: number;
@@ -141,11 +146,14 @@ export interface VisualizationGraph {
   timeline_nodes: TimelineNode[];
   primary_path: string[];
   alternative_paths: string[][];
-  strategy_comparison: Record<string, {
-    success_rate: number;
-    growth_cycle: number;
-    skill_adaptability: number;
-  }>;
+  strategy_comparison: Record<
+    string,
+    {
+      success_rate: number;
+      growth_cycle: number;
+      skill_adaptability: number;
+    }
+  >;
   render_hints: Record<string, unknown>;
 }
 
@@ -182,7 +190,7 @@ export interface SimulationFeedback {
 
 export interface T008PipelineOutput {
   execution_id: string;
-  status: "success" | "partial" | "failed";
+  status: 'success' | 'partial' | 'failed';
   errors: string[];
   user_profile: UserProfile | null;
   career_data: CareerData | null;

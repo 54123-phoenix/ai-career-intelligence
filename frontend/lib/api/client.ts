@@ -22,10 +22,7 @@ function getToken(): string | null {
   return localStorage.getItem('aci_token');
 }
 
-export async function apiFetch<T>(
-  path: string,
-  options?: RequestInit
-): Promise<T> {
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${BASE}${path}`;
   const token = getToken();
 
@@ -49,11 +46,7 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
-    throw new ApiError(
-      errBody.detail || `HTTP ${res.status}`,
-      res.status,
-      errBody
-    );
+    throw new ApiError(errBody.detail || `HTTP ${res.status}`, res.status, errBody);
   }
 
   // Handle 204 No Content

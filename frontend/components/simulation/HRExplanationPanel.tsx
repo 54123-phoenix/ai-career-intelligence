@@ -1,16 +1,21 @@
-import type { HRReasoning, CandidateActions, FailurePoint, ConfidenceScore } from "@/types/simulation";
+import type {
+  HRReasoning,
+  CandidateActions,
+  FailurePoint,
+  ConfidenceScore,
+} from '@/types/simulation';
 
 const verdictStyles: Record<string, string> = {
-  passed: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
-  hard_pass: "bg-red-200 text-red-900",
-  not_screened: "bg-gray-100 text-gray-600",
+  passed: 'bg-green-100 text-green-800',
+  failed: 'bg-red-100 text-red-800',
+  hard_pass: 'bg-red-200 text-red-900',
+  not_screened: 'bg-gray-100 text-gray-600',
 };
 
 const severityIcons: Record<string, string> = {
-  critical: "🔴",
-  high: "🟠",
-  medium: "🟡",
+  critical: '🔴',
+  high: '🟠',
+  medium: '🟡',
 };
 
 export function HRExplanationPanel({
@@ -30,8 +35,10 @@ export function HRExplanationPanel({
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <h3 className="mb-3 text-lg font-semibold text-gray-900">HR Verdict</h3>
         <div className="flex items-center gap-3 mb-3">
-          <span className={`rounded-full px-3 py-1 text-sm font-medium ${verdictStyles[hr.verdict]}`}>
-            {hr.verdict.replace("_", " ").toUpperCase()}
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-medium ${verdictStyles[hr.verdict]}`}
+          >
+            {hr.verdict.replace('_', ' ').toUpperCase()}
           </span>
           {hr.score != null && (
             <span className="text-xl font-bold text-gray-900">{hr.score.toFixed(3)}</span>
@@ -40,7 +47,9 @@ export function HRExplanationPanel({
         <p className="mb-2 text-sm text-gray-700">{hr.evaluation}</p>
         {hr.details.length > 0 && (
           <ul className="list-disc pl-5 text-sm text-gray-600 space-y-0.5">
-            {hr.details.map((d, i) => <li key={i}>{d}</li>)}
+            {hr.details.map((d, i) => (
+              <li key={i}>{d}</li>
+            ))}
           </ul>
         )}
       </div>
@@ -74,12 +83,16 @@ export function HRExplanationPanel({
           {failures.map((fp, i) => (
             <div key={i} className="mb-3 last:mb-0 rounded-lg bg-white p-4">
               <div className="flex items-center gap-2 mb-1">
-                <span>{severityIcons[fp.severity] || "●"}</span>
+                <span>{severityIcons[fp.severity] || '●'}</span>
                 <span className="font-medium text-gray-900">{fp.stage}</span>
                 <span className="text-xs text-gray-500">[{fp.severity}]</span>
               </div>
-              <p className="text-sm text-gray-700"><strong>Cause:</strong> {fp.cause}</p>
-              <p className="text-sm text-gray-600 mt-1"><strong>Fix:</strong> {fp.remediation}</p>
+              <p className="text-sm text-gray-700">
+                <strong>Cause:</strong> {fp.cause}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                <strong>Fix:</strong> {fp.remediation}
+              </p>
             </div>
           ))}
         </div>
@@ -89,7 +102,9 @@ export function HRExplanationPanel({
       <div className="rounded-xl border bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">Explanation Confidence</span>
-          <span className="text-lg font-bold text-gray-900">{(confidence.overall * 100).toFixed(0)}%</span>
+          <span className="text-lg font-bold text-gray-900">
+            {(confidence.overall * 100).toFixed(0)}%
+          </span>
         </div>
         <div className="mt-2 h-2 rounded-full bg-gray-100">
           <div

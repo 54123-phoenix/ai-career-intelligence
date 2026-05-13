@@ -1,9 +1,9 @@
-import type { SkillGapChartSection } from "@/types/simulation";
+import type { SkillGapChartSection } from '@/types/simulation';
 
 const categoryColors: Record<string, string> = {
-  required: "bg-blue-500",
-  optional: "bg-purple-400",
-  bonus: "bg-emerald-400",
+  required: 'bg-blue-500',
+  optional: 'bg-purple-400',
+  bonus: 'bg-emerald-400',
 };
 
 export function SkillGapChart({ data }: { data: SkillGapChartSection }) {
@@ -18,17 +18,27 @@ export function SkillGapChart({ data }: { data: SkillGapChartSection }) {
   );
 }
 
-function SkillColumn({ title, skills }: { title: string; skills: { name: string; value: number; category: string }[] }) {
+function SkillColumn({
+  title,
+  skills,
+}: {
+  title: string;
+  skills: { name: string; value: number; category: string }[];
+}) {
   return (
     <div>
-      <h4 className="mb-2 text-sm font-medium text-gray-500">{title} ({skills.length})</h4>
+      <h4 className="mb-2 text-sm font-medium text-gray-500">
+        {title} ({skills.length})
+      </h4>
       <div className="space-y-1.5">
         {skills.map((s) => (
           <div key={s.name} className="flex items-center gap-2">
-            <span className="w-24 truncate text-sm text-gray-700" title={s.name}>{s.name}</span>
+            <span className="w-24 truncate text-sm text-gray-700" title={s.name}>
+              {s.name}
+            </span>
             <div className="flex-1 h-1.5 rounded-full bg-gray-100">
               <div
-                className={`h-1.5 rounded-full ${categoryColors[s.category] || "bg-gray-400"}`}
+                className={`h-1.5 rounded-full ${categoryColors[s.category] || 'bg-gray-400'}`}
                 style={{ width: `${s.value}%` }}
               />
             </div>

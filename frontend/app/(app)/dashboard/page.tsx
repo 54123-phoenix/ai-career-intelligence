@@ -183,7 +183,9 @@ export default function DashboardPage() {
 
           {user?.career_goals && user.career_goals.length > 0 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">职业目标</h3>
+              <h3 className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                职业目标
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {user.career_goals.map((goal) => (
                   <span
@@ -252,9 +254,12 @@ function QuickActionCard({
   color: 'indigo' | 'emerald' | 'amber';
 }) {
   const colorMap = {
-    indigo: 'hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/20',
-    emerald: 'hover:border-emerald-300 hover:bg-emerald-50/50 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/20',
-    amber: 'hover:border-amber-300 hover:bg-amber-50/50 dark:hover:border-amber-800 dark:hover:bg-amber-950/20',
+    indigo:
+      'hover:border-indigo-300 hover:bg-indigo-50/50 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/20',
+    emerald:
+      'hover:border-emerald-300 hover:bg-emerald-50/50 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/20',
+    amber:
+      'hover:border-amber-300 hover:bg-amber-50/50 dark:hover:border-amber-800 dark:hover:bg-amber-950/20',
   };
 
   return (
@@ -297,5 +302,9 @@ function ActivityIcon({ type }: { type: UserHistoryItem['type'] }) {
     },
   };
   const config = map[type] || map.profile_update;
-  return <div className={`flex h-6 w-6 items-center justify-center rounded-full ${config.bg}`}>{config.icon}</div>;
+  return (
+    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${config.bg}`}>
+      {config.icon}
+    </div>
+  );
 }

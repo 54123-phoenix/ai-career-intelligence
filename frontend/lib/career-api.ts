@@ -1,7 +1,7 @@
 /** @deprecated — 本文件保留向后兼容，新代码请使用 lib/api/career.ts */
 
-import type { T010PipelineOutput } from "@/types/t010";
-import { runT010Pipeline } from "./t010-api";
+import type { T010PipelineOutput } from '@/types/t010';
+import { runT010Pipeline } from './t010-api';
 
 export interface CareerAnalysisRequest {
   user_id?: string;
@@ -12,12 +12,10 @@ export interface CareerAnalysisRequest {
 
 export interface CareerAnalysisResult {
   data: T010PipelineOutput;
-  source: "api" | "mock";
+  source: 'api' | 'mock';
 }
 
-export async function analyzeCareer(
-  params: CareerAnalysisRequest
-): Promise<CareerAnalysisResult> {
+export async function analyzeCareer(params: CareerAnalysisRequest): Promise<CareerAnalysisResult> {
   return runT010Pipeline({
     user_id: params.user_id,
     user_input: params.user_input,
@@ -32,10 +30,10 @@ export async function submitCareerFeedback(params: {
   strategy_rating?: number;
   comments?: string;
 }): Promise<{ received: boolean; feedback_id: string }> {
-  const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
   const res = await fetch(`${BASE}/career/feedback`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) {

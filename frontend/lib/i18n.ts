@@ -26,7 +26,10 @@ export function useI18n() {
 }
 
 /** Get nested value from dictionary by dot-notation key */
-function getDictValue(dict: Dictionary, key: string): string | string[] | Record<string, string> | undefined {
+function getDictValue(
+  dict: Dictionary,
+  key: string
+): string | string[] | Record<string, string> | undefined {
   const parts = key.split('.');
   let current: unknown = dict;
   for (const part of parts) {

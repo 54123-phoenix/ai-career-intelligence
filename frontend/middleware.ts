@@ -7,11 +7,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public assets and API
-  if (
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/api/') ||
-    pathname.includes('.')
-  ) {
+  if (pathname.startsWith('/_next/') || pathname.startsWith('/api/') || pathname.includes('.')) {
     return NextResponse.next();
   }
 

@@ -29,9 +29,7 @@ export interface AnalyzeCareerResponse {
 }
 
 /** 职业综合分析 — 解析画像、推荐岗位、生成策略、模拟验证 */
-export async function analyzeCareer(
-  params: AnalyzeCareerRequest
-): Promise<AnalyzeCareerResponse> {
+export async function analyzeCareer(params: AnalyzeCareerRequest): Promise<AnalyzeCareerResponse> {
   try {
     const raw = await apiFetch<Record<string, unknown>>('/career/analyze', {
       method: 'POST',
@@ -191,12 +189,20 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
     plan: data.career_plan
       ? {
           steps: ((data.career_plan as Record<string, unknown>).steps as unknown[]) || [],
-          selected_strategy: (data.career_plan as Record<string, unknown>).selected_strategy as CareerPlan['selected_strategy'],
-          total_duration_days: Number((data.career_plan as Record<string, unknown>).total_duration_days || 0),
-          risk_points: ((data.career_plan as Record<string, unknown>).risk_points as string[]) || [],
+          selected_strategy: (data.career_plan as Record<string, unknown>)
+            .selected_strategy as CareerPlan['selected_strategy'],
+          total_duration_days: Number(
+            (data.career_plan as Record<string, unknown>).total_duration_days || 0
+          ),
+          risk_points:
+            ((data.career_plan as Record<string, unknown>).risk_points as string[]) || [],
           skill_gaps: ((data.career_plan as Record<string, unknown>).skill_gaps as string[]) || [],
-          recommendation: String((data.career_plan as Record<string, unknown>).recommendation || ''),
-          estimated_success_rate: Number((data.career_plan as Record<string, unknown>).estimated_success_rate || 0),
+          recommendation: String(
+            (data.career_plan as Record<string, unknown>).recommendation || ''
+          ),
+          estimated_success_rate: Number(
+            (data.career_plan as Record<string, unknown>).estimated_success_rate || 0
+          ),
         }
       : undefined,
     simulationResult: data.simulation_feedback
@@ -205,7 +211,12 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
           strategyName: '',
           outcome: 'timeout',
           successProbability:
-            ((data.simulation_feedback as Record<string, unknown>).base_feedback as Record<string, unknown>)?.average_success_rate as number || 0,
+            ((
+              (data.simulation_feedback as Record<string, unknown>).base_feedback as Record<
+                string,
+                unknown
+              >
+            )?.average_success_rate as number) || 0,
           timeline: [],
           skillGap: [],
           recommendations: [],
@@ -226,7 +237,11 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
     careerData: data.career_data
       ? {
           totalEntries: Number((data.career_data as Record<string, unknown>).total_entries || 0),
-          entries: ((data.career_data as Record<string, unknown>).entries as Array<Record<string, unknown>> || []).map((e) => ({
+          entries: (
+            ((data.career_data as Record<string, unknown>).entries as Array<
+              Record<string, unknown>
+            >) || []
+          ).map((e) => ({
             jobTitle: String(e.job_title || ''),
             requiredSkills: (e.required_skills as string[]) || [],
           })),

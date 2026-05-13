@@ -7,13 +7,13 @@ interface Props {
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
-  success_rate: "Success Rate",
-  match_degree: "Profile Match",
-  growth_cycle: "Growth Speed",
-  skill_adaptability: "Skill Adaptability",
+  success_rate: 'Success Rate',
+  match_degree: 'Profile Match',
+  growth_cycle: 'Growth Speed',
+  skill_adaptability: 'Skill Adaptability',
 };
 
-const STRATEGY_COLORS = ["#3498db", "#2ecc71", "#f39c12", "#e74c3c", "#9b59b6"];
+const STRATEGY_COLORS = ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6'];
 
 export default function StrategyComparison({ data }: Props) {
   if (!data || !data.strategies.length) {

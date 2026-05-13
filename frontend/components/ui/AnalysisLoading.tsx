@@ -3,20 +3,39 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-import {
-  FileText,
-  Search,
-  Compass,
-  Activity,
-  LayoutTemplate,
-} from 'lucide-react';
+import { FileText, Search, Compass, Activity, LayoutTemplate } from 'lucide-react';
 
 const STEPS = [
-  { key: 'parse', icon: <FileText size={18} key="parse" />, name: '解析职业画像', desc: '提取技能、经验与目标...' },
-  { key: 'retrieve', icon: <Search size={18} key="retrieve" />, name: '匹配岗位与策略', desc: '检索推荐岗位与发展路径...' },
-  { key: 'architect', icon: <Compass size={18} key="architect" />, name: '生成职业策略', desc: '构建职业规划与行动计划...' },
-  { key: 'simulate', icon: <Activity size={18} key="simulate" />, name: '模拟路径验证', desc: '推演不同策略的成功率...' },
-  { key: 'render', icon: <LayoutTemplate size={18} key="render" />, name: '准备可视化结果', desc: '整理图表与建议...' },
+  {
+    key: 'parse',
+    icon: <FileText size={18} key="parse" />,
+    name: '解析职业画像',
+    desc: '提取技能、经验与目标...',
+  },
+  {
+    key: 'retrieve',
+    icon: <Search size={18} key="retrieve" />,
+    name: '匹配岗位与策略',
+    desc: '检索推荐岗位与发展路径...',
+  },
+  {
+    key: 'architect',
+    icon: <Compass size={18} key="architect" />,
+    name: '生成职业策略',
+    desc: '构建职业规划与行动计划...',
+  },
+  {
+    key: 'simulate',
+    icon: <Activity size={18} key="simulate" />,
+    name: '模拟路径验证',
+    desc: '推演不同策略的成功率...',
+  },
+  {
+    key: 'render',
+    icon: <LayoutTemplate size={18} key="render" />,
+    name: '准备可视化结果',
+    desc: '整理图表与建议...',
+  },
 ] as const;
 
 interface Props {
@@ -79,9 +98,7 @@ export function AnalysisLoading({ activeStep = -1 }: Props) {
       <div className="mb-8">
         <div className="mb-2 flex items-center justify-between text-xs">
           <span className="font-mono text-slate-400">{t('pipeline.title')}</span>
-          <span className="font-mono text-neon-cyan">
-            {Math.round(progress)}%
-          </span>
+          <span className="font-mono text-neon-cyan">{Math.round(progress)}%</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
           <motion.div
@@ -101,9 +118,10 @@ export function AnalysisLoading({ activeStep = -1 }: Props) {
           className="absolute left-6 top-8 w-px bg-gradient-to-b from-neon-cyan via-neon-blue to-neon-purple"
           initial={{ height: 0 }}
           animate={{
-            height: currentStep > 0
-              ? `${((Math.min(currentStep, STEPS.length) - 0.5) / STEPS.length) * 100}%`
-              : 0,
+            height:
+              currentStep > 0
+                ? `${((Math.min(currentStep, STEPS.length) - 0.5) / STEPS.length) * 100}%`
+                : 0,
           }}
           transition={{ duration: 0.6 }}
         />
@@ -129,8 +147,8 @@ export function AnalysisLoading({ activeStep = -1 }: Props) {
                       isDone
                         ? 'border-neon-cyan/40 bg-cyan-500/10 text-neon-cyan'
                         : isActive
-                        ? 'border-current bg-slate-800/80 text-neon-cyan shadow-lg shadow-cyan-500/30'
-                        : 'border-slate-700/50 bg-slate-900/40 text-slate-600'
+                          ? 'border-current bg-slate-800/80 text-neon-cyan shadow-lg shadow-cyan-500/30'
+                          : 'border-slate-700/50 bg-slate-900/40 text-slate-600'
                     }`}
                     animate={
                       isActive
@@ -191,7 +209,9 @@ export function AnalysisLoading({ activeStep = -1 }: Props) {
                       </motion.span>
                     )}
                     {isDone && (
-                      <span className="text-[10px] font-mono text-neon-green">{t('pipeline.done')}</span>
+                      <span className="text-[10px] font-mono text-neon-green">
+                        {t('pipeline.done')}
+                      </span>
                     )}
                   </div>
                   <p

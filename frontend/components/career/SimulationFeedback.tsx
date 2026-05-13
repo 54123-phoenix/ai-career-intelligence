@@ -33,21 +33,23 @@ export default function SimulationFeedbackPanel({ data }: Props) {
   if ('average_success_rate' in data) {
     const successColor =
       data.average_success_rate >= 0.7
-        ? "text-green-600"
+        ? 'text-green-600'
         : data.average_success_rate >= 0.4
-          ? "text-yellow-600"
-          : "text-red-600";
+          ? 'text-yellow-600'
+          : 'text-red-600';
 
     const bgColor =
       data.average_success_rate >= 0.7
-        ? "bg-green-50"
+        ? 'bg-green-50'
         : data.average_success_rate >= 0.4
-          ? "bg-yellow-50"
-          : "bg-red-50";
+          ? 'bg-yellow-50'
+          : 'bg-red-50';
 
     return (
       <div className="rounded-lg border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Simulation Results</h3>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          Simulation Results
+        </h3>
 
         <div className={`mb-6 rounded-lg ${bgColor} p-4`}>
           <div className="flex items-baseline gap-3">
@@ -70,26 +72,22 @@ export default function SimulationFeedbackPanel({ data }: Props) {
 
         {data.rounds && data.rounds.length > 0 && (
           <div className="mb-6 space-y-1.5">
-            <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Per-Round Probabilities</div>
+            <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              Per-Round Probabilities
+            </div>
             {data.rounds.map((r) => (
               <div key={r.round_id} className="flex items-center gap-2 text-xs">
-                <span className="w-8 text-right font-mono text-gray-400">
-                  #{r.round_id}
-                </span>
+                <span className="w-8 text-right font-mono text-gray-400">#{r.round_id}</span>
                 <div className="h-5 flex-1 rounded bg-gray-100 dark:bg-slate-800">
                   <div
                     className={`h-5 rounded transition-all ${
-                      r.success ? "bg-green-400" : "bg-red-300"
+                      r.success ? 'bg-green-400' : 'bg-red-300'
                     }`}
                     style={{ width: `${(r.success_probability * 100).toFixed(0)}%` }}
                   />
                 </div>
-                <span className="w-16 font-mono">
-                  {(r.success_probability * 100).toFixed(0)}%
-                </span>
-                <span className="w-8 text-center">
-                  {r.success ? "✓" : "✗"}
-                </span>
+                <span className="w-16 font-mono">{(r.success_probability * 100).toFixed(0)}%</span>
+                <span className="w-8 text-center">{r.success ? '✓' : '✗'}</span>
               </div>
             ))}
           </div>
@@ -97,7 +95,9 @@ export default function SimulationFeedbackPanel({ data }: Props) {
 
         {data.aggregated_risks && Object.keys(data.aggregated_risks).length > 0 && (
           <div className="mb-4">
-            <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Top Risks</div>
+            <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              Top Risks
+            </div>
             <div className="space-y-1">
               {Object.entries(data.aggregated_risks)
                 .sort((a, b) => (b[1] as number) - (a[1] as number))
@@ -139,17 +139,17 @@ export default function SimulationFeedbackPanel({ data }: Props) {
   // New format (SimulationSummary)
   const successColor =
     (data.successProbability || 0) >= 0.7
-      ? "text-green-600"
+      ? 'text-green-600'
       : (data.successProbability || 0) >= 0.4
-        ? "text-yellow-600"
-        : "text-red-600";
+        ? 'text-yellow-600'
+        : 'text-red-600';
 
   const bgColor =
     (data.successProbability || 0) >= 0.7
-      ? "bg-green-50"
+      ? 'bg-green-50'
       : (data.successProbability || 0) >= 0.4
-        ? "bg-yellow-50"
-        : "bg-red-50";
+        ? 'bg-yellow-50'
+        : 'bg-red-50';
 
   return (
     <div className="rounded-lg border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
@@ -160,14 +160,10 @@ export default function SimulationFeedbackPanel({ data }: Props) {
           <span className={`text-3xl font-bold ${successColor}`}>
             {((data.successProbability || 0) * 100).toFixed(0)}%
           </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            预估成功率
-          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">预估成功率</span>
         </div>
         {data.outcome && (
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-            结果：{data.outcome}
-          </div>
+          <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">结果：{data.outcome}</div>
         )}
       </div>
 
@@ -189,7 +185,9 @@ export default function SimulationFeedbackPanel({ data }: Props) {
         <div>
           <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">置信度</div>
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-semibold">{((data.confidenceScore.overall || 0) * 100).toFixed(0)}%</span>
+            <span className="text-lg font-semibold">
+              {((data.confidenceScore.overall || 0) * 100).toFixed(0)}%
+            </span>
           </div>
         </div>
       )}

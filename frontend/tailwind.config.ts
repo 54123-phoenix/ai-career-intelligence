@@ -35,14 +35,14 @@ const config: Config = {
       },
       animation: {
         'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 3s ease-in-out infinite',
+        float: 'float 3s ease-in-out infinite',
       },
       keyframes: {
         'pulse-glow': {
           '0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(6, 182, 212, 0.3)' },
           '50%': { opacity: '.8', boxShadow: '0 0 40px rgba(6, 182, 212, 0.6)' },
         },
-        'float': {
+        float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
         },

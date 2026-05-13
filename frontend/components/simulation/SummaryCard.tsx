@@ -1,9 +1,9 @@
-import type { SummarySection } from "@/types/simulation";
+import type { SummarySection } from '@/types/simulation';
 
 const badgeStyles: Record<string, string> = {
-  success: "bg-green-100 text-green-800 border-green-300",
-  failure: "bg-red-100 text-red-800 border-red-300",
-  warning: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  success: 'bg-green-100 text-green-800 border-green-300',
+  failure: 'bg-red-100 text-red-800 border-red-300',
+  warning: 'bg-yellow-100 text-yellow-800 border-yellow-300',
 };
 
 export function SummaryCard({ data }: { data: SummarySection }) {
@@ -11,7 +11,9 @@ export function SummaryCard({ data }: { data: SummarySection }) {
     <div className="rounded-xl border bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
-          <span className={`inline-block rounded-full border px-3 py-1 text-sm font-medium ${badgeStyles[data.badge]}`}>
+          <span
+            className={`inline-block rounded-full border px-3 py-1 text-sm font-medium ${badgeStyles[data.badge]}`}
+          >
             {data.badge.toUpperCase()}
           </span>
           <h2 className="mt-3 text-xl font-semibold text-gray-900">{data.headline}</h2>
@@ -22,7 +24,10 @@ export function SummaryCard({ data }: { data: SummarySection }) {
       </div>
       <div className="mt-4 grid grid-cols-3 gap-4 border-t pt-4">
         <Stat label="Success P" value={`${(data.stats.success_probability * 100).toFixed(0)}%`} />
-        <Stat label="Steps to Offer" value={data.stats.time_to_offer_steps > 0 ? String(data.stats.time_to_offer_steps) : "—"} />
+        <Stat
+          label="Steps to Offer"
+          value={data.stats.time_to_offer_steps > 0 ? String(data.stats.time_to_offer_steps) : '—'}
+        />
         <Stat label="Reward" value={data.stats.total_reward.toFixed(2)} />
       </div>
     </div>

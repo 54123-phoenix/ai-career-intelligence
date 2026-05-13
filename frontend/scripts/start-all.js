@@ -33,33 +33,42 @@ const PROCESSES = [];
 
 function log(label, color, message) {
   const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
-  console.log(`${COLORS.dim}[${timestamp}]${COLORS.reset} ${color}[${label}]${COLORS.reset} ${message}`);
+  console.log(
+    `${COLORS.dim}[${timestamp}]${COLORS.reset} ${color}[${label}]${COLORS.reset} ${message}`
+  );
 }
 
 function startBackend() {
   log('backend', COLORS.cyan, 'Starting FastAPI on http://localhost:8000 ...');
 
-  const proc = spawn('python', [
-    '-m', 'uvicorn', 'backend.main:app',
-    '--host', '0.0.0.0',
-    '--port', '8000',
-    '--reload',
-  ], {
-    cwd: PROJECT_ROOT,
-    stdio: ['ignore', 'pipe', 'pipe'],
-    shell: process.platform === 'win32',
-  });
+  const proc = spawn(
+    'python',
+    ['-m', 'uvicorn', 'backend.main:app', '--host', '0.0.0.0', '--port', '8000', '--reload'],
+    {
+      cwd: PROJECT_ROOT,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: process.platform === 'win32',
+    }
+  );
 
   proc.stdout.on('data', (data) => {
-    data.toString().split('\n').filter(Boolean).forEach((line) => {
-      log('backend', COLORS.cyan, line.trim());
-    });
+    data
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .forEach((line) => {
+        log('backend', COLORS.cyan, line.trim());
+      });
   });
 
   proc.stderr.on('data', (data) => {
-    data.toString().split('\n').filter(Boolean).forEach((line) => {
-      log('backend', COLORS.cyan, line.trim());
-    });
+    data
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .forEach((line) => {
+        log('backend', COLORS.cyan, line.trim());
+      });
   });
 
   proc.on('close', (code) => {
@@ -80,15 +89,23 @@ function startFrontend() {
   });
 
   proc.stdout.on('data', (data) => {
-    data.toString().split('\n').filter(Boolean).forEach((line) => {
-      log('frontend', COLORS.blue, line.trim());
-    });
+    data
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .forEach((line) => {
+        log('frontend', COLORS.blue, line.trim());
+      });
   });
 
   proc.stderr.on('data', (data) => {
-    data.toString().split('\n').filter(Boolean).forEach((line) => {
-      log('frontend', COLORS.blue, line.trim());
-    });
+    data
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .forEach((line) => {
+        log('frontend', COLORS.blue, line.trim());
+      });
   });
 
   proc.on('close', (code) => {
@@ -148,7 +165,9 @@ if (process.platform === 'win32') {
     PROCESSES.forEach((proc) => {
       try {
         spawn('taskkill', ['/pid', proc.pid.toString(), '/f', '/t'], { shell: true });
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     });
   });
 }

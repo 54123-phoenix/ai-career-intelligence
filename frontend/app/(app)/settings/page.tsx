@@ -72,7 +72,9 @@ export default function SettingsPage() {
               </button>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-300">确定清除所有本地数据？</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  确定清除所有本地数据？
+                </span>
                 <button
                   onClick={() => {
                     localStorage.clear();

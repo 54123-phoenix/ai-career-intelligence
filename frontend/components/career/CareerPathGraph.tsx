@@ -7,22 +7,22 @@ interface Props {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  beginner: "#3498db",
-  intermediate: "#2ecc71",
-  advanced: "#f39c12",
-  expert: "#e74c3c",
+  beginner: '#3498db',
+  intermediate: '#2ecc71',
+  advanced: '#f39c12',
+  expert: '#e74c3c',
 };
 
 const EVENT_ICONS: Record<string, string> = {
-  skill_acquisition: "📚",
-  application: "📤",
-  interview: "🎯",
-  offer: "🎉",
-  milestone: "🏁",
+  skill_acquisition: '📚',
+  application: '📤',
+  interview: '🎯',
+  offer: '🎉',
+  milestone: '🏁',
 };
 
 function SkillNodeCard({ node }: { node: CareerPathData['skill_nodes'][number] }) {
-  const color = LEVEL_COLORS[node.level] || "#95a5a6";
+  const color = LEVEL_COLORS[node.level] || '#95a5a6';
   return (
     <div
       className="rounded-lg border px-4 py-3"
@@ -38,14 +38,10 @@ function SkillNodeCard({ node }: { node: CareerPathData['skill_nodes'][number] }
         </span>
       </div>
       {node.dependencies.length > 0 && (
-        <div className="mt-1 text-xs text-gray-500">
-          Requires: {node.dependencies.join(", ")}
-        </div>
+        <div className="mt-1 text-xs text-gray-500">Requires: {node.dependencies.join(', ')}</div>
       )}
       {node.estimated_hours > 0 && (
-        <div className="mt-1 text-xs text-gray-400">
-          ~{node.estimated_hours}h to acquire
-        </div>
+        <div className="mt-1 text-xs text-gray-400">~{node.estimated_hours}h to acquire</div>
       )}
     </div>
   );
@@ -54,18 +50,16 @@ function SkillNodeCard({ node }: { node: CareerPathData['skill_nodes'][number] }
 function TimelineNodeRow({ node }: { node: CareerPathData['timeline_nodes'][number] }) {
   return (
     <div className="flex items-start gap-3 py-2">
-      <div className="mt-0.5 text-lg">{EVENT_ICONS[node.event_type] || "●"}</div>
+      <div className="mt-0.5 text-lg">{EVENT_ICONS[node.event_type] || '●'}</div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-gray-400">Week {node.week}</span>
           <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
-            {node.event_type.replace("_", " ")}
+            {node.event_type.replace('_', ' ')}
           </span>
         </div>
         <div className="font-medium">{node.label}</div>
-        {node.details && (
-          <div className="text-sm text-gray-500">{node.details}</div>
-        )}
+        {node.details && <div className="text-sm text-gray-500">{node.details}</div>}
       </div>
     </div>
   );
@@ -111,10 +105,7 @@ export default function CareerPathGraph({ data }: Props) {
 
         {data.skill_edges.length > 0 && (
           <div className="mt-4 text-xs text-gray-400">
-            Dependencies:{" "}
-            {data.skill_edges
-              .map((edge) => `${edge[0]} → ${edge[1]}`)
-              .join(", ")}
+            Dependencies: {data.skill_edges.map((edge) => `${edge[0]} → ${edge[1]}`).join(', ')}
           </div>
         )}
       </div>

@@ -3,14 +3,14 @@
  * 对应功能模块：用户管理（注册/登录、信息管理、权限控制）
  */
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export interface UserAccount {
   user_id: string;
   email: string;
   name: string;
   avatar?: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   created_at: string;
 }
 
@@ -19,7 +19,7 @@ export interface UserPreferences {
   preferred_industries: string[];
   preferred_locations: string[];
   salary_expectation: [number, number] | null;
-  privacy_level: "none" | "basic" | "full";
+  privacy_level: 'none' | 'basic' | 'full';
 }
 
 export interface UserProfile extends UserAccount, UserPreferences {
@@ -30,7 +30,7 @@ export interface UserProfile extends UserAccount, UserPreferences {
 
 /** 获取当前登录用户信息 */
 export async function getCurrentUser(): Promise<UserProfile> {
-  const res = await fetch(`${BASE}/users/me`, { credentials: "include" });
+  const res = await fetch(`${BASE}/users/me`, { credentials: 'include' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -41,8 +41,8 @@ export async function updateUserProfile(
   profile: Partial<UserProfile>
 ): Promise<UserProfile> {
   const res = await fetch(`${BASE}/users/${encodeURIComponent(userId)}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(profile),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -55,8 +55,8 @@ export async function loginUser(params: {
   password: string;
 }): Promise<{ token: string; user: UserProfile }> {
   const res = await fetch(`${BASE}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -70,8 +70,8 @@ export async function registerUser(params: {
   name: string;
 }): Promise<{ token: string; user: UserProfile }> {
   const res = await fetch(`${BASE}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

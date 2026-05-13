@@ -80,8 +80,8 @@ export function Navbar() {
                         ? 'bg-slate-800 text-slate-100'
                         : 'bg-indigo-50 text-indigo-700 dark:bg-slate-800 dark:text-cyan-400'
                       : isDashboard
-                      ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
-                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                        ? 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
                   {item.icon}

@@ -8,11 +8,11 @@ interface Props {
 }
 
 const PHASE_COLORS: Record<string, string> = {
-  preparation: "#3498db",
-  application: "#2ecc71",
-  interview: "#f39c12",
-  negotiation: "#e74c3c",
-  onboarding: "#9b59b6",
+  preparation: '#3498db',
+  application: '#2ecc71',
+  interview: '#f39c12',
+  negotiation: '#e74c3c',
+  onboarding: '#9b59b6',
 };
 
 export default function CareerPlanTimeline({ plan, timeline }: Props) {
@@ -32,18 +32,14 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
         <h3 className="text-lg font-semibold">
           {plan.selected_strategy ? (
             <>
-              Career Plan —{" "}
-              <span className="capitalize">
-                {plan.selected_strategy.strategy.strategy_name}
-              </span>
+              Career Plan —{' '}
+              <span className="capitalize">{plan.selected_strategy.strategy.strategy_name}</span>
             </>
           ) : (
-            "Career Plan"
+            'Career Plan'
           )}
         </h3>
-        <span className="text-sm text-gray-500">
-          {plan.total_duration_days} days total
-        </span>
+        <span className="text-sm text-gray-500">{plan.total_duration_days} days total</span>
       </div>
 
       {/* Gantt-like timeline */}
@@ -51,7 +47,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
         {timeline.map((step) => {
           const leftPct = (step.start_day / maxDay) * 100;
           const widthPct = (step.duration_days / maxDay) * 100;
-          const color = PHASE_COLORS[step.phase] || "#95a5a6";
+          const color = PHASE_COLORS[step.phase] || '#95a5a6';
 
           return (
             <div key={step.step_number}>
@@ -82,10 +78,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
                   {step.phase}
                 </span>
                 {step.milestones.map((m, i) => (
-                  <span
-                    key={i}
-                    className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600"
-                  >
+                  <span key={i} className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
                     🏁 {m}
                   </span>
                 ))}
@@ -113,9 +106,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
 
         {(plan.skill_gaps?.length ?? 0) > 0 && (
           <div>
-            <div className="mb-2 text-sm font-medium text-orange-600">
-              Skill Gaps
-            </div>
+            <div className="mb-2 text-sm font-medium text-orange-600">Skill Gaps</div>
             <div className="flex flex-wrap gap-1.5">
               {(plan.skill_gaps ?? []).map((gap) => (
                 <span

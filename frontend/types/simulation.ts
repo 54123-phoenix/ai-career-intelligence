@@ -6,7 +6,7 @@
 export interface FinalT004Schema {
   simulation_id: string;
   strategy_name: string;
-  outcome: "accepted" | "rejected" | "timeout";
+  outcome: 'accepted' | 'rejected' | 'timeout';
   summary: SummarySection;
   match_score: MatchScoreSection;
   timeline: TimelineSection;
@@ -26,7 +26,7 @@ export interface SummarySection {
   candidate_name: string;
   job_title: string;
   company: string;
-  badge: "success" | "failure" | "warning";
+  badge: 'success' | 'failure' | 'warning';
   stats: {
     success_probability: number;
     time_to_offer_steps: number;
@@ -43,7 +43,7 @@ export interface MatchScoreSection {
   };
   gauge: {
     value: number;
-    color: "green" | "yellow" | "red";
+    color: 'green' | 'yellow' | 'red';
     label: string;
   };
 }
@@ -55,8 +55,8 @@ export interface TimelineSection {
 
 export interface TimelineEvent {
   step: number;
-  phase: "applied" | "screened" | "interview" | "offer" | "accepted" | "rejected";
-  actor: "candidate" | "hr" | "interview" | "system";
+  phase: 'applied' | 'screened' | 'interview' | 'offer' | 'accepted' | 'rejected';
+  actor: 'candidate' | 'hr' | 'interview' | 'system';
   action_label: string;
   reasoning: string;
   score?: number;
@@ -74,12 +74,12 @@ export interface SkillGapChartSection {
 export interface SkillBar {
   name: string;
   value: number;
-  category: "required" | "optional" | "bonus";
+  category: 'required' | 'optional' | 'bonus';
 }
 
 export interface RecommendationCard {
   priority: number;
-  type: "action" | "warning" | "info" | "success";
+  type: 'action' | 'warning' | 'info' | 'success';
   title: string;
   description: string;
   action_label?: string;
@@ -104,7 +104,7 @@ export interface DecisionStep {
 export interface HRReasoning {
   evaluation: string;
   score: number | null;
-  verdict: "passed" | "failed" | "hard_pass" | "not_screened";
+  verdict: 'passed' | 'failed' | 'hard_pass' | 'not_screened';
   details: string[];
   rejection_reasons: string[];
 }
@@ -126,7 +126,7 @@ export interface CandidateAction {
 
 export interface FailurePoint {
   stage: string;
-  severity: "critical" | "high" | "medium";
+  severity: 'critical' | 'high' | 'medium';
   cause: string;
   detail: string;
   remediation: string;

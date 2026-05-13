@@ -1,9 +1,9 @@
 /** T010 API client — lightweight core layer endpoints */
 
-import type { T010PipelineOutput } from "@/types/t010";
-import { MOCK_PIPELINE_OUTPUT } from "./mock-data";
+import type { T010PipelineOutput } from '@/types/t010';
+import { MOCK_PIPELINE_OUTPUT } from './mock-data';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export interface T010RunRequest {
   user_id?: string;
@@ -19,13 +19,11 @@ export interface T010RunResult {
   source: 'api' | 'mock';
 }
 
-export async function runT010Pipeline(
-  params: T010RunRequest,
-): Promise<T010RunResult> {
+export async function runT010Pipeline(params: T010RunRequest): Promise<T010RunResult> {
   try {
     const res = await fetch(`${BASE}/career/t010/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
     });
     if (!res.ok) {
@@ -45,13 +43,16 @@ export async function runT010Pipeline(
 export async function getT010UpgradeInterfaces(): Promise<{
   version: string;
   description: string;
-  agents: Record<string, {
-    agent: string;
-    core_capability: string;
-    upgrade_hooks: string[];
-    upgrade_notes: string;
-    version: string;
-  }>;
+  agents: Record<
+    string,
+    {
+      agent: string;
+      core_capability: string;
+      upgrade_hooks: string[];
+      upgrade_notes: string;
+      version: string;
+    }
+  >;
 }> {
   const res = await fetch(`${BASE}/career/t010/upgrade-interfaces`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

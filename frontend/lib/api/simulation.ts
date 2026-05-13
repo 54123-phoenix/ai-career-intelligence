@@ -15,9 +15,7 @@ export interface CompareStrategiesRequest {
   strategies: ('aggressive' | 'balanced' | 'conservative')[];
 }
 
-export async function runSimulation(
-  params: RunSimulationRequest
-): Promise<SimulationResult> {
+export async function runSimulation(params: RunSimulationRequest): Promise<SimulationResult> {
   return apiFetch<SimulationResult>('/simulation/run', {
     method: 'POST',
     body: JSON.stringify(params),
