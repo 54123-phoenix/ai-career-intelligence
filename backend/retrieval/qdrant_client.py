@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 
 from qdrant_client import QdrantClient
@@ -122,5 +123,6 @@ class QdrantStore:
         return self._client
 
 
-# Module-level singleton
-store = QdrantStore()
+# Module-level singleton — reads QDRANT_URL env var for Docker deployments
+_store_location = os.environ.get("QDRANT_URL", ":memory:")
+store = QdrantStore(location=_store_location)

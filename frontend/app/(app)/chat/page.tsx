@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useRef, useCallback, memo } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { streamChatMessage } from '@/lib/api/chat';
-import 'highlight.js/styles/github-dark.css';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const MarkdownContent = memo(function MarkdownContent({ content }: { content: string }) {
+function MarkdownContent({ content }: { content: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -20,25 +19,28 @@ const MarkdownContent = memo(function MarkdownContent({ content }: { content: st
         ul: ({ children }) => <ul className="mb-2 list-disc pl-4 last:mb-0">{children}</ul>,
         ol: ({ children }) => <ol className="mb-2 list-decimal pl-4 last:mb-0">{children}</ol>,
         li: ({ children }) => <li className="mb-0.5">{children}</li>,
-        code({ className, children, ...props }) {
-          const isInline = !className?.includes('language-');
-          return isInline ? (
-            <code className="rounded bg-slate-700 px-1 py-0.5 text-xs text-slate-100" {...props}>
+        pre: ({ children }) => (
+          <pre className="my-2 overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">
+            {children}
+          </pre>
+        ),
+        code: ({ className, children, ...props }) => {
+          const match = /language-(\w+)/.exec(className || '');
+          return match ? (
+            <code className={className} {...props}>
               {children}
             </code>
           ) : (
-            <pre className="my-2 overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs">
-              <code className={className} {...props}>
-                {children}
-              </code>
-            </pre>
+            <code className="rounded bg-slate-700 px-1 py-0.5 text-xs text-slate-100" {...props}>
+              {children}
+            </code>
           );
         },
         h1: ({ children }) => <h1 className="mb-2 text-base font-bold">{children}</h1>,
         h2: ({ children }) => <h2 className="mb-2 text-sm font-bold">{children}</h2>,
         h3: ({ children }) => <h3 className="mb-1 text-sm font-semibold">{children}</h3>,
         blockquote: ({ children }) => (
-          <blockquote className="mb-2 border-l-2 border-indigo-400 pl-3 text-slate-300 italic">
+          <blockquote className="mb-2 border-l-2 border-indigo-400 pl-3 text-slate-400 italic dark:text-slate-300">
             {children}
           </blockquote>
         ),
@@ -47,26 +49,30 @@ const MarkdownContent = memo(function MarkdownContent({ content }: { content: st
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 underline"
+            className="text-indigo-600 underline dark:text-indigo-400"
           >
             {children}
           </a>
         ),
         table: ({ children }) => (
-          <table className="mb-2 w-full border-collapse text-xs">{children}</table>
+          <div className="mb-2 overflow-x-auto">
+            <table className="w-full border-collapse text-xs">{children}</table>
+          </div>
         ),
         th: ({ children }) => (
-          <th className="border border-slate-600 bg-slate-800 px-2 py-1 text-left font-semibold">
+          <th className="border border-slate-300 bg-slate-100 px-2 py-1 text-left font-semibold dark:border-slate-600 dark:bg-slate-800">
             {children}
           </th>
         ),
-        td: ({ children }) => <td className="border border-slate-600 px-2 py-1">{children}</td>,
+        td: ({ children }) => (
+          <td className="border border-slate-300 px-2 py-1 dark:border-slate-600">{children}</td>
+        ),
       }}
     >
       {content}
     </ReactMarkdown>
   );
-});
+}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([

@@ -2,13 +2,13 @@
 
 Routes at /api/v1/career:
   POST /path     — career path graph data
-  POST /resume   — resume upload & parse (placeholder)
+  POST /resume   — resume upload & parse
   GET  /trends   — market trend data
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from ._career_state import _t010
 
@@ -56,12 +56,28 @@ async def career_path(body: CareerPathRequest):
 
 
 @router.post("/resume", response_model=dict, tags=["Career Facade"])
-async def career_upload_resume():
-    """业务 facade：简历上传与解析. MVP: placeholder."""
+async def career_upload_resume(file: UploadFile = File(...)):
+    """业务 facade：简历上传与解析. 内部调用 parser 模块."""
+    filename = (file.filename or "").lower()
+    if filename.endswith(".pdf"):
+        source_type = "pdf"
+    elif filename.endswith((".md", ".markdown")):
+        source_type = "markdown"
+    elif filename.endswith(".txt"):
+        source_type = "text"
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+
+    from backend.parser import parse_resume
+
+    content = await file.read()
+    resume = await parse_resume(content, source_type=source_type)
     return {
-        "resume_id": "res-facade-001",
-        "parsed": {"skills": [], "experience": []},
-        "message": "Resume upload endpoint ready — integrate with parser",
+        "resume_id": resume.resume_id,
+        "parsed": {
+            "skills": resume.skills,
+            "experience": [e.model_dump() for e in resume.experience],
+        },
     }
 
 

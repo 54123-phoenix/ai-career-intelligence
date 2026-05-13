@@ -13,7 +13,7 @@ import math
 from backend.shared.types import MatchResult, StructuredJob, StructuredResume
 
 from .embedder import embedder
-from .vector_store import JobVectorStore
+from .qdrant_client import store as default_store
 
 
 def _cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -40,8 +40,8 @@ class JobMatcher:
       - Indexed: jobs already in JobVectorStore → delegate to vector search
     """
 
-    def __init__(self, store: JobVectorStore | None = None):
-        self._store = store or JobVectorStore()
+    def __init__(self, store=None):
+        self._store = store or default_store
 
     # ---- direct mode ---------------------------------------------------------
 
@@ -103,29 +103,40 @@ class JobMatcher:
         top_k: int = 10,
         score_threshold: float = 0.0,
     ) -> list[MatchResult]:
-        """Indexed matching: search pre-indexed jobs in JobVectorStore.
+        """Indexed matching: search pre-indexed jobs via QdrantStore.
 
-        Use this when jobs have been upserted via store.upsert_job_embedding().
+        Use this when jobs have been upserted via Retriever.index_job().
         """
+        from .schemas import COLLECTION_JOBS
+
         query_vec = resume.skill_embedding or embedder.encode_resume(resume)
-        hits = self._store.search_similar_jobs(query_vec, top_k=top_k, score_threshold=score_threshold)
+        try:
+            hits = self._store.search(
+                collection=COLLECTION_JOBS,
+                query_vector=query_vec,
+                top_k=top_k,
+                score_threshold=score_threshold,
+            )
+        except Exception:
+            # Qdrant unreachable — return empty rather than crash
+            return []
 
         results: list[MatchResult] = []
         for h in hits:
-            metadata = h["metadata"]
-            required = metadata.get("required_skills", [])
+            payload = h["payload"]
+            required = payload.get("required_skills", [])
             results.append(
                 MatchResult(
-                    item_id=h["job_id"],
+                    item_id=h["id"],
                     score=h["score"],
                     payload={
-                        "title": metadata.get("title", ""),
-                        "company": metadata.get("company", ""),
+                        "title": payload.get("title", ""),
+                        "company": payload.get("company", ""),
                         "required_skills": required,
-                        "optional_skills": metadata.get("optional_skills", []),
-                        "salary_range": metadata.get("salary_range"),
-                        "level": metadata.get("level", ""),
-                        "location": metadata.get("location", ""),
+                        "optional_skills": payload.get("optional_skills", []),
+                        "salary_range": payload.get("salary_range"),
+                        "level": payload.get("level", ""),
+                        "location": payload.get("location", ""),
                         "missing_skills": _missing_skills(resume.skills, required),
                     },
                     match_type="resume_to_job",
