@@ -47,7 +47,7 @@ created: 2026-05-13
 ## 验收标准
 - [x] 新 facade 端点可通过 Postman/curl 调用（`/career/analyze`, `/auth/register`, `/auth/login`, `/users/me`, `/users/me/history` 已就绪）
 - [x] 旧 T008/T009/T010 端点仍可访问（向后兼容）
-- [ ] 旧端点响应包含 deprecation 标记（placeholder 代码存在，未接入 middleware）
+- [x] 旧端点响应包含 deprecation 标记（main.py 中 `deprecation_middleware` 为所有 `/career/t008/*`、`/career/t009/*`、`/career/t010/*` 响应注入 `Deprecation: true` 和 `Sunset: 2026-12-31`）
 - [x] 新端点类型与前端 `types/*.ts` 对齐（前端 `adaptApiToCareerResult` 已适配字段映射）
 - [ ] 单元测试覆盖新 facade 逻辑
 

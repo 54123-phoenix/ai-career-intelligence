@@ -702,38 +702,8 @@ async def career_trends(user_id: str = "default-user"):
     }
 
 
-# ── Deprecation headers for old T00x endpoints ─────────────────────────────
-
-_original_t008_run = t008_run
-_original_t009_run = t009_run
-_original_t010_run = t010_run
-
-
-async def _t008_run_deprecated(body: T008RunRequest):
-    from fastapi import Response
-    response = Response()
-    response.headers["Deprecation"] = "true"
-    response.headers["Sunset"] = "2026-12-31"
-    return await _original_t008_run(body)
-
-
-async def _t009_run_deprecated(body: T009RunRequest):
-    from fastapi import Response
-    response = Response()
-    response.headers["Deprecation"] = "true"
-    response.headers["Sunset"] = "2026-12-31"
-    return await _original_t009_run(body)
-
-
-async def _t010_run_deprecated(body: T010RunRequest):
-    from fastapi import Response
-    response = Response()
-    response.headers["Deprecation"] = "true"
-    response.headers["Sunset"] = "2026-12-31"
-    return await _original_t010_run(body)
-
-
-# Override with deprecated versions
-# Note: FastAPI does not easily support response header injection via wrapper
-# without middleware. The above is a placeholder for actual middleware-based
-# deprecation header injection in production.
+# ── Deprecation headers ────────────────────────────────────────────────────
+# Handled globally by middleware in main.py (deprecation_middleware).
+# All /career/t008/*, /career/t009/*, /career/t010/* responses include:
+#   Deprecation: true
+#   Sunset: 2026-12-31

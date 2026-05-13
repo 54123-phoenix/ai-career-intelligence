@@ -33,6 +33,18 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Deprecation header middleware for legacy T00x endpoints
+    @app.middleware("http")
+    async def deprecation_middleware(request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith("/api/v1/career/t008") or \
+           path.startswith("/api/v1/career/t009") or \
+           path.startswith("/api/v1/career/t010"):
+            response.headers["Deprecation"] = "true"
+            response.headers["Sunset"] = "2026-12-31"
+        return response
+
     # Health check (no deps, always available)
     @app.get("/health")
     async def health() -> dict[str, str]:
