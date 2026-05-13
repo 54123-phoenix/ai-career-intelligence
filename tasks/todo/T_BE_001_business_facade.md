@@ -1,6 +1,6 @@
 ---
 id: T-BE-001
-status: todo
+status: in_progress
 assignee: architect_agent
 type: feature
 created: 2026-05-13
@@ -45,8 +45,13 @@ created: 2026-05-13
 - 认证使用 JWT，middleware 注入当前用户
 
 ## 验收标准
-- [ ] 新 facade 端点可通过 Postman/curl 调用
-- [ ] 旧 T008/T009/T010 端点仍可访问（向后兼容）
-- [ ] 旧端点响应包含 deprecation 标记
-- [ ] 新端点类型与前端 `types/*.ts` 对齐
+- [x] 新 facade 端点可通过 Postman/curl 调用（`/career/analyze`, `/auth/register`, `/auth/login`, `/users/me`, `/users/me/history` 已就绪）
+- [x] 旧 T008/T009/T010 端点仍可访问（向后兼容）
+- [ ] 旧端点响应包含 deprecation 标记（placeholder 代码存在，未接入 middleware）
+- [x] 新端点类型与前端 `types/*.ts` 对齐（前端 `adaptApiToCareerResult` 已适配字段映射）
 - [ ] 单元测试覆盖新 facade 逻辑
+
+## 进展备注（2026-05-13）
+- `backend/api/routes/auth.py`：Bearer Token Header 认证已修复，注册/登录/获取用户/更新用户/历史记录均可用。
+- `backend/api/routes/career.py`：Facade 端点已存在（`/career/analyze`, `/career/resume`, `/career/recommendations`, `/career/match-score`, `/career/feedback`, `/career/path`, `/career/trends`），但 `analyze` 外的端点多为占位符/MVP。
+- 旧端点 deprecation header：文件末尾有 placeholder wrapper，但未真正通过 middleware 注入。

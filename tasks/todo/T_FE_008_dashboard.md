@@ -1,6 +1,6 @@
 ---
 id: T-FE-008
-status: todo
+status: in_progress
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -38,9 +38,19 @@ created: 2026-05-13
 - 验证所有旧路由重定向生效
 
 ## 验收标准
-- [ ] Dashboard 无 pipeline/Agent 暴露
-- [ ] 展示用户概览、推荐职业、任务进度
-- [ ] 旧 API/类型文件已标记 @deprecated
-- [ ] 旧路由重定向验证通过
-- [ ] `npm run build` 零错误
-- [ ] `npm run lint` 零警告
+- [ ] Dashboard 无 pipeline/Agent 暴露（旧代码仍在，已标记 @deprecated）
+- [ ] 展示用户概览、推荐职业、任务进度（待重构）
+- [x] 旧 API/类型文件已标记 @deprecated（`lib/career-api.ts` 已标记，未使用旧文件已清理）
+- [x] 旧路由重定向验证通过（`/career/growth` → `/analysis` 等）
+- [x] `npm run build` 零错误（12 路由全部通过）
+- [ ] `npm run lint` 零警告（未执行）
+
+## 进展备注（2026-05-13）
+- `frontend/app/(app)/dashboard/page.tsx` 仍保留旧 T010 代码（332 行），已添加文件级 `@deprecated` 注释。
+- 清理工作已完成：删除 `lib/t008-api.ts`、恢复 `lib/mock-data.ts`（t010 fallback 仍需）。
+- Landing 页面已创建（`(marketing)/page.tsx`），根路由 `/` 不再重定向到 `/dashboard`。
+- Settings 页面已创建（`(app)/settings/page.tsx`），提供主题切换与数据清除功能。
+- Navbar 已升级为包含用户头像下拉菜单。
+
+## 剩余工作
+- Dashboard 全面重写：移除 `ActOneInput`/`ActTwoStrategy`/`ActThreeSimulation` 等旧组件引用，替换为 `StatsGrid` + `RecentActivity` + 快捷入口的业务概览布局。

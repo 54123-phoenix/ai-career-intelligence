@@ -1,6 +1,6 @@
 ---
 id: T-FE-004
-status: todo
+status: done
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -36,9 +36,15 @@ created: 2026-05-13
 - 后端接口若未就绪，使用 mock 数据过渡
 
 ## 验收标准
-- [ ] 登录表单可提交并获取 token
-- [ ] 注册表单可提交并创建用户
-- [ ] 登录后 Navbar 显示用户名称
-- [ ] 登出后清除 token 并跳转 /login
-- [ ] 未认证用户无法访问 (app) 路由组
-- [ ] `npm run build` 无错误
+- [x] 登录表单可提交并获取 token（对接 `/auth/login`）
+- [x] 注册表单可提交并创建用户（对接 `/auth/register`）
+- [x] 登录后 Navbar 显示用户名称/头像下拉菜单
+- [x] 登出后清除 token 并跳转 /login
+- [x] 未认证用户无法访问 (app) 路由组（`(app)/layout.tsx` AuthGuard）
+- [x] `npm run build` 无错误
+
+## 完成备注（2026-05-13）
+- `frontend/app/(marketing)/login/page.tsx` 与 `register/page.tsx` 已对接真实后端 API
+- `frontend/stores/authStore.ts` 管理登录态，持久化 token，支持 `fetchUser` 恢复会话
+- `frontend/components/layout/Navbar.tsx` 新增用户头像下拉菜单（用户中心链接 + 退出登录）
+- 后端 `backend/api/routes/auth.py` 已修复 Bearer Header 认证提取

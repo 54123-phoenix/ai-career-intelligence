@@ -1,6 +1,6 @@
 ---
 id: T-FE-007
-status: todo
+status: done
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -36,8 +36,19 @@ created: 2026-05-13
 - 后端接口若未就绪，使用 mock 过渡
 
 ## 验收标准
-- [ ] Chat 页面可发送消息并接收回复
-- [ ] 回复支持流式渲染（打字机效果）
-- [ ] Profile 页面可编辑并保存用户信息
-- [ ] 操作记录按时间倒序展示
-- [ ] `npm run build` 无错误
+- [x] Chat 页面可发送消息并接收 SSE 流式回复
+- [x] 回复支持流式渲染（逐字追加，loading 态有动画指示器）
+- [x] Profile 页面可编辑并保存用户信息（对接 `updateUserProfile`）
+- [x] 操作记录按时间倒序展示（对接 `getUserHistory`，失败时展示 mock 数据）
+- [x] `npm run build` 无错误
+
+## 完成备注（2026-05-13）
+- `frontend/app/(app)/chat/page.tsx`：
+  - 接入 `streamChatMessage` SSE 流式 API
+  - 使用 `ReadableStreamDefaultReader` + `TextDecoder` 实现逐字渲染
+  - 保留 `conversation_id` 字段为后续会话连续性做准备
+- `frontend/app/(app)/profile/page.tsx`：
+  - 加载时自动调用 `getCurrentUser` + `getUserHistory`
+  - 支持编辑姓名、工作经验、学历、技能、职业目标、期望地点
+  - 保存时调用 `updateUserProfile`，成功/失败均有 toast 提示
+  - API 不可用时自动降级到 demo 数据

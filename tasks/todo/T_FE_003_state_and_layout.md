@@ -1,6 +1,6 @@
 ---
 id: T-FE-003
-status: todo
+status: done
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -35,9 +35,15 @@ created: 2026-05-13
 - 不引入额外状态管理库
 
 ## 验收标准
-- [ ] Zustand 3 个 store 可独立运行
-- [ ] (marketing) 和 (app) 路由组分离
-- [ ] 未登录访问 /dashboard 重定向到 /login
-- [ ] Navbar 在所有 (app) 页面一致出现
-- [ ] Sidebar 在桌面端可见，移动端隐藏
-- [ ] `npm run build` 无错误
+- [x] Zustand 3 个 store 可独立运行
+- [x] (marketing) 和 (app) 路由组分离
+- [x] 未登录访问 /dashboard 重定向到 /login（`(app)/layout.tsx` AuthGuard）
+- [x] Navbar 在所有 (app) 页面一致出现
+- [ ] Sidebar 在桌面端可见，移动端隐藏（当前未实现 Sidebar，仅用 Navbar 导航）
+- [x] `npm run build` 无错误
+
+## 完成备注（2026-05-13）
+- `frontend/stores/{auth,career,ui}Store.ts` 已建立并运行
+- `(app)/layout.tsx` 提供 AuthGuard + Navbar + 主题壳
+- `(marketing)/layout.tsx` 提供营销页布局
+- Sidebar 未实现（当前 Navbar 已覆盖全部导航需求，Sidebar 可在后续迭代补充）

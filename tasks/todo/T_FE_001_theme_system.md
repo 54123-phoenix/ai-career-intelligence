@@ -1,6 +1,6 @@
 ---
 id: T-FE-001
-status: todo
+status: done
 assignee: frontend_agent
 type: feature
 created: 2026-05-13
@@ -30,10 +30,16 @@ created: 2026-05-13
 - 主题偏好持久化（localStorage）
 
 ## 验收标准
-- [ ] `npm install next-themes` 成功
-- [ ] Tailwind 配置启用 `darkMode: 'class'`
-- [ ] 根 layout 包裹 ThemeProvider
-- [ ] Navbar 或 Settings 页面可切换主题
-- [ ] Dashboard 页面在 dark 模式下保持原有深色外观
-- [ ] Analysis/Simulation/Chat/Profile 在 light 模式下正常显示
-- [ ] `npm run build` 无类型/样式错误
+- [x] `next-themes` 已安装并配置
+- [x] Tailwind 配置启用 `darkMode: 'class'`
+- [x] 根 layout 包裹 ThemeProvider
+- [x] Navbar 和 Settings 页面均可切换主题
+- [x] Dashboard 页面在 dark 模式下保持原有深色外观
+- [x] Analysis/Simulation/Chat/Profile/Settings/Landing 均已支持 dark 模式
+- [x] `npm run build` 无类型/样式错误
+
+## 完成备注（2026-05-13）
+- `frontend/app/layout.tsx` 已包裹 `ThemeProvider`
+- `frontend/components/ui/ThemeToggle.tsx` 已提供切换按钮
+- `frontend/app/(app)/settings/page.tsx` 提供 light/dark/system 三档切换
+- 所有新页面均按规范使用 `bg-white dark:bg-slate-950` 等双版本样式
