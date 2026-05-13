@@ -341,9 +341,10 @@ export interface ChatMessage {
 - [x] 实现 `profile/page.tsx`：用户信息 + 操作记录（接入 `user.ts` API）
 - [ ] 在 Analysis/Simulation 页面嵌入反馈收集组件 —— 待后端 `/career/feedback` 就绪
 
-### Phase 6: 仪表盘整合（进行中）
-- [ ] 重构 `dashboard/page.tsx`：移除 pipeline 信息，展示业务概览
-- [ ] 整合 StatsGrid、TaskProgress、RecentActivity
+### Phase 6: 仪表盘整合 ✅
+- [x] 重构 `dashboard/page.tsx`：移除 pipeline 信息，展示业务概览
+- [x] 整合 StatsGrid、RecentActivity、QuickActions、SkillsCloud
+- [x] 清理未使用旧组件 `components/dashboard/*`、`components/charts/*`
 
 ### Phase 7: 清理与迁移（进行中）
 - [x] 删除未使用旧文件：`lib/t008-api.ts`、`lib/mock-data.ts`
