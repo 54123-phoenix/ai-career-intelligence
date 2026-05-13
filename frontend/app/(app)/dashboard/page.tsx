@@ -1,3 +1,4 @@
+/** @deprecated — Dashboard 旧版页面，保留向后兼容。将在 Phase 6 重构为业务概览仪表盘。 */
 'use client';
 
 import { useState, useCallback } from 'react';

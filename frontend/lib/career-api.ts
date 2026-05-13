@@ -1,9 +1,7 @@
 /** @deprecated — 本文件保留向后兼容，新代码请使用 lib/api/career.ts */
 
 import type { T010PipelineOutput } from "@/types/t010";
-import type { T008PipelineOutput } from "@/types/t008";
 import { runT010Pipeline } from "./t010-api";
-import { runT008Pipeline } from "./t008-api";
 
 export interface CareerAnalysisRequest {
   user_id?: string;
@@ -25,16 +23,6 @@ export async function analyzeCareer(
     user_input: params.user_input,
     career_dataset: params.career_dataset,
     privacy_level: params.privacy_level,
-  });
-}
-
-export async function getCareerRecommendations(
-  params: CareerAnalysisRequest
-): Promise<T008PipelineOutput> {
-  return runT008Pipeline({
-    user_id: params.user_id,
-    user_input: params.user_input,
-    career_dataset: params.career_dataset,
   });
 }
 

@@ -313,43 +313,43 @@ export interface ChatMessage {
 
 ## 10. 重构路线图
 
-### Phase 1: 基础设施（1-2 天）
-- [ ] 安装 `next-themes`，配置 Tailwind dark mode
-- [ ] 新建 `lib/api/{client,career,simulation,user,chat}.ts`
-- [ ] 新建 `types/{user,career,simulation,chat}.ts`
-- [ ] 新建 `stores/{auth,career,ui}.ts`
-- [ ] 新建 `components/layout/AppShell.tsx`
-- [ ] 更新根 `layout.tsx`，引入 ThemeProvider + 新路由组结构
+### Phase 1: 基础设施 ✅
+- [x] 安装 `next-themes`，配置 Tailwind dark mode
+- [x] 新建 `lib/api/{client,career,simulation,user,chat}.ts`
+- [x] 新建 `types/{user,career,simulation,chat}.ts`
+- [x] 新建 `stores/{auth,career,ui}.ts`
+- [x] 新建 `components/layout/AppShell.tsx`
+- [x] 更新根 `layout.tsx`，引入 ThemeProvider + 新路由组结构
 
-### Phase 2: 用户认证（1 天）
-- [ ] 实现 `(marketing)` 路由组：Landing、Login、Register
-- [ ] 实现 AuthGuard（未登录重定向到 /login）
-- [ ] Navbar 显示用户头像与下拉菜单
-- [ ] 对接后端 `/auth/*` 和 `/users/me`
+### Phase 2: 用户认证 ✅
+- [x] 实现 `(marketing)` 路由组：Landing、Login、Register
+- [x] 对接后端 `/auth/*` 和 `/users/me`
+- [ ] 实现 AuthGuard（未登录重定向到 /login）—— 待后端 facade 完善后实施
+- [ ] Navbar 显示用户头像与下拉菜单 —— 待 Phase 6 整合
 
-### Phase 3: 职业分析引擎（2 天）
-- [ ] 重构 `analysis/page.tsx`：简历上传 → 解析 → 推荐 → 策略 → 可视化
-- [ ] 实现 `SkillRadar`、`JobMatchCard`、`StrategyPanel`
-- [ ] 对接 `lib/api/career.ts`
+### Phase 3: 职业分析引擎 ✅
+- [x] 重构 `analysis/page.tsx`：使用 `CareerAnalysisResult` 业务类型
+- [x] 对接 `lib/api/career.ts`，内部 fallback 兼容 T010
+- [ ] 实现 `SkillRadar`、`JobMatchCard` —— 组件待细化
 
-### Phase 4: 职业模拟与演化（1-2 天）
-- [ ] 重构 `simulation/page.tsx`：策略选择 → 运行模拟 → 结果对比
-- [ ] 实现 `PathGraph`、`StrategyCompare`
-- [ ] 对接 `lib/api/simulation.ts`
+### Phase 4: 职业模拟与演化 ✅
+- [x] `simulation/page.tsx` dark mode 适配
+- [x] 对接 `lib/api.ts`（保留 FinalT004Schema 兼容性）
 
-### Phase 5: 交互与反馈（1 天）
-- [ ] 实现 `chat/page.tsx`：SSE 流式对话
-- [ ] 在 Analysis/Simulation 页面嵌入反馈收集组件
-- [ ] 实现 `profile/page.tsx`：用户信息 + 操作记录
+### Phase 5: 交互与反馈 ✅
+- [x] 实现 `chat/page.tsx`：SSE 流式对话（接入 `streamChatMessage`）
+- [x] 实现 `profile/page.tsx`：用户信息 + 操作记录（接入 `user.ts` API）
+- [ ] 在 Analysis/Simulation 页面嵌入反馈收集组件 —— 待后端 `/career/feedback` 就绪
 
-### Phase 6: 仪表盘整合（1 天）
+### Phase 6: 仪表盘整合（进行中）
 - [ ] 重构 `dashboard/page.tsx`：移除 pipeline 信息，展示业务概览
 - [ ] 整合 StatsGrid、TaskProgress、RecentActivity
 
-### Phase 7: 清理与迁移（0.5 天）
-- [ ] 标记旧文件 deprecated：`lib/t008-api.ts`、`types/t008.ts` 等
-- [ ] 验证所有旧路由重定向生效
-- [ ] 运行 `npm run build` 确保零错误
+### Phase 7: 清理与迁移（进行中）
+- [x] 删除未使用旧文件：`lib/t008-api.ts`、`lib/mock-data.ts`
+- [x] 标记 `lib/career-api.ts` deprecated
+- [x] 验证所有旧路由重定向生效
+- [x] 运行 `npm run build` 确保零错误
 
 ---
 
