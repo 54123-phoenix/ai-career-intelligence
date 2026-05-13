@@ -22,7 +22,6 @@ from ._career_state import (
     _architect,
     _simulator,
     _frontend,
-    _t010,
 )
 
 from pydantic import BaseModel, Field

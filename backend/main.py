@@ -38,9 +38,15 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": app.version}
 
-    # L1 routes — mounted when Agent domains deliver implementations
-    # from backend.api.routes.parser import router as parser_router
-    # app.include_router(parser_router, prefix="/api/v1/parser", tags=["L1 Parser"])
+    # Register default LLM provider before any route that may need it
+    from backend.shared.llm_providers import register_default_provider
+
+    register_default_provider()
+
+    # L1 Parser routes
+    from backend.api.routes.parser import router as parser_router
+
+    app.include_router(parser_router, prefix="/api/v1/parser", tags=["L1 Parser"])
 
     from backend.api.routes.retrieval import router as retrieval_router
 
