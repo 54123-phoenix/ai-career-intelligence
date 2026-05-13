@@ -5,7 +5,7 @@ Registered at /api/v1/auth and /api/v1/users
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header, Request
 from pydantic import BaseModel, Field
 
 router = APIRouter()
@@ -79,6 +79,22 @@ def _get_current_user(token: str | None = None) -> dict | None:
     return _users_db.get(user_id)
 
 
+def _extract_token_from_header(authorization: str | None = Header(None, alias="Authorization")) -> str | None:
+    if not authorization:
+        return None
+    parts = authorization.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer":
+        return parts[1]
+    return authorization
+
+
+async def get_current_user_dep(token: str | None = Depends(_extract_token_from_header)) -> dict:
+    user = _get_current_user(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return user
+
+
 # ── Auth routes ────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=dict, tags=["Auth"])
@@ -124,19 +140,12 @@ async def login(body: LoginRequest):
 # ── User routes ────────────────────────────────────────────────────────────
 
 @router.get("/me", response_model=UserProfileResponse, tags=["User"])
-async def get_me(token: str | None = None):
-    user = _get_current_user(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+async def get_me(user: dict = Depends(get_current_user_dep)):
     return {k: v for k, v in user.items() if k != "password_hash"}
 
 
 @router.patch("/me", response_model=UserProfileResponse, tags=["User"])
-async def update_me(body: UpdateProfileRequest, token: str | None = None):
-    user = _get_current_user(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
+async def update_me(body: UpdateProfileRequest, user: dict = Depends(get_current_user_dep)):
     updates = body.model_dump(exclude_unset=True)
     for k, v in updates.items():
         user[k] = v
@@ -144,11 +153,7 @@ async def update_me(body: UpdateProfileRequest, token: str | None = None):
 
 
 @router.get("/me/history", response_model=dict, tags=["User"])
-async def get_history(token: str | None = None, page: int = 1, limit: int = 20):
-    user = _get_current_user(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
+async def get_history(user: dict = Depends(get_current_user_dep), page: int = 1, limit: int = 20):
     # MVP: return mock history
     mock_items = [
         {
