@@ -90,21 +90,10 @@ export async function uploadResume(file: File): Promise<{
   const formData = new FormData();
   formData.append('file', file);
 
-  const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-  const token = typeof window !== 'undefined' ? localStorage.getItem('aci_token') : null;
-
-  const res = await fetch(`${BASE}/career/resume`, {
+  return apiFetch('/career/resume', {
     method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `HTTP ${res.status}`);
-  }
-
-  return res.json();
 }
 
 /** 提交用户反馈 */
