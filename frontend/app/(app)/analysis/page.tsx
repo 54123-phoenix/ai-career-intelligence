@@ -4,13 +4,15 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { CareerAnalysisResult } from '@/types/career';
 import type { CareerPathData } from '@/types/simulation';
-import { analyzeCareer, submitCareerFeedback, getCareerPath } from '@/lib/api/career';
+import { analyzeCareer, getCareerPath } from '@/lib/api/career';
 import {
   StrategyComparison,
   CareerPathGraph,
   SimulationFeedback,
   CareerPlanTimeline,
 } from '@/components/career';
+import { StatCard } from '@/components/analysis/StatCard';
+import { AnalysisFeedback } from '@/components/analysis/AnalysisFeedback';
 
 const SkillRadar = dynamic(() => import('@/components/analysis/SkillRadar'), {
   ssr: false,
@@ -27,11 +29,6 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [feedbackLoading, setFeedbackLoading] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-
   const [userInput, setUserInput] = useState(
     '目标成为高级后端工程师，掌握 Python、FastAPI、PostgreSQL，有3年经验，本科，期望在北京工作'
   );
@@ -316,64 +313,7 @@ export default function AnalysisPage() {
             )}
 
             {/* Feedback */}
-            {data.status === 'success' && (
-              <div className="rounded-xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-slate-900">
-                <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                  分析反馈
-                </h3>
-                {feedbackMessage && (
-                  <div className="mb-3 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900/30 dark:bg-green-950/30 dark:text-green-300">
-                    {feedbackMessage}
-                  </div>
-                )}
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">评分：</span>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(star)}
-                      className={`text-xl transition-colors ${
-                        star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
-                      }`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-                <textarea
-                  className="mb-3 w-full rounded-lg border px-3 py-2 text-sm dark:border-gray-600 dark:bg-slate-800 dark:text-white"
-                  rows={2}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="您的建议或意见..."
-                />
-                <button
-                  onClick={async () => {
-                    if (!rating) return;
-                    setFeedbackLoading(true);
-                    try {
-                      await submitCareerFeedback({
-                        analysis_id: data.id,
-                        rating,
-                        comments: comment,
-                      });
-                      setFeedbackMessage('感谢您的反馈！');
-                      setRating(0);
-                      setComment('');
-                    } catch (e) {
-                      setFeedbackMessage(e instanceof Error ? e.message : '提交失败');
-                    } finally {
-                      setFeedbackLoading(false);
-                      setTimeout(() => setFeedbackMessage(null), 4000);
-                    }
-                  }}
-                  disabled={feedbackLoading || !rating}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {feedbackLoading ? '提交中...' : '提交反馈'}
-                </button>
-              </div>
-            )}
+            {data.status === 'success' && <AnalysisFeedback analysisId={data.id} />}
           </div>
         </>
       )}
@@ -387,11 +327,4 @@ export default function AnalysisPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-lg bg-gray-50 p-4 text-center dark:bg-slate-800">
-      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
-      <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
-    </div>
-  );
-}
+

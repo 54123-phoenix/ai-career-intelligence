@@ -22,6 +22,7 @@ from ._career_state import (
     _architect,
     _simulator,
     _frontend,
+    _t010,
 )
 
 from pydantic import BaseModel, Field
@@ -152,23 +153,13 @@ async def list_events(user_id: str, limit: int = 50):
 async def career_analyze(body: CareerAnalyzeRequest):
     """业务 facade：职业综合分析（解析 + 推荐 + 策略 + 模拟）.
 
-    内部调用 T010 pipeline，对外隐藏实现细节。
+    内部通过 CareerService 调用 T010 pipeline，对外隐藏实现细节。
     """
-    output = _t010.run(
+    from backend.career.career_service import CareerService
+
+    service = CareerService()
+    return service.analyze(
         user_input=body.user_input,
-        user_id="facade-user",
-        privacy_level="basic",
+        resume_data=body.resume_data,
+        depth=body.depth,
     )
-    return {
-        "id": output.execution_id,
-        "status": output.status,
-        "user_profile": output.user_profile.model_dump() if output.user_profile else None,
-        "recommendations": [j.model_dump() for j in output.job_recommendations],
-        "strategies": [s.model_dump() for s in output.strategy_list],
-        "plan": output.career_plan.model_dump() if output.career_plan else None,
-        "simulation": output.simulation_feedback.model_dump() if output.simulation_feedback else None,
-        "frontend_data": output.frontend_data,
-        "generated_at": output.generated_at,
-        "career_data": None,
-        "errors": output.errors,
-    }

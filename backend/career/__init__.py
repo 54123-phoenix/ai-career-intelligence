@@ -68,6 +68,7 @@ from backend.career.t010_schemas import (
     UpgradeInterface,
 )
 from backend.career.t010_pipeline import T010Pipeline
+from backend.career.career_service import CareerService
 
 __all__ = [
     # T007
@@ -133,4 +134,5 @@ __all__ = [
     "T010FrontendData",
     "T010PipelineOutput",
     "T010Pipeline",
+    "CareerService",
 ]
