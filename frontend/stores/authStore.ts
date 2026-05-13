@@ -27,7 +27,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { token, user } = await loginUser({ email, password });
-          localStorage.setItem('aci_token', token);
           setCookie('aci_token', token);
           set({ user, token, isAuthenticated: true, isLoading: false });
         } catch (err) {
@@ -40,7 +39,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { token, user } = await registerUser({ email, password, name });
-          localStorage.setItem('aci_token', token);
           setCookie('aci_token', token);
           set({ user, token, isAuthenticated: true, isLoading: false });
         } catch (err) {
@@ -50,7 +48,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        localStorage.removeItem('aci_token');
         deleteCookie('aci_token');
         set({ user: null, token: null, isAuthenticated: false });
       },
