@@ -148,7 +148,10 @@ class SimulationEngine:
             if action == "apply":
                 state.current_step = "screened"
             elif action == "prepare":
-                pass  # stay in applied, skill up
+                # Allow one prepare cycle; force advance to screened on second attempt
+                # Prevents infinite prepare loop that causes timeout at MAX_STEPS
+                if state.step_count >= 2:
+                    state.current_step = "screened"
             elif action == "pivot":
                 state.current_step = "rejected"
 
