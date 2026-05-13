@@ -66,6 +66,7 @@ def job_to_text(job) -> str:
 
     parts = [
         job.title,
+        job.company,
         job.description,
         " ".join(job.required_skills),
         " ".join(job.optional_skills),
