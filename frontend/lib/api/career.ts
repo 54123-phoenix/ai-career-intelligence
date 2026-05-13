@@ -30,14 +30,12 @@ export interface AnalyzeCareerResponse {
 export async function analyzeCareer(
   params: AnalyzeCareerRequest
 ): Promise<AnalyzeCareerResponse> {
-  // TODO: 后端 facade 就绪后切换为 /career/analyze
-  // 过渡期：内部调用现有 T010 端点，但对外保持业务语义
   try {
-    const data = await apiFetch<CareerAnalysisResult>('/career/analyze', {
+    const raw = await apiFetch<Record<string, unknown>>('/career/analyze', {
       method: 'POST',
       body: JSON.stringify(params),
     });
-    return { data, source: 'api' };
+    return { data: adaptApiToCareerResult(raw), source: 'api' };
   } catch {
     // Fallback：若后端 facade 未就绪，降级到 T010（内部兼容，不暴露给上层）
     const { runT010Pipeline } = await import('@/lib/t010-api');
@@ -126,7 +124,26 @@ export async function getCareerTrends(): Promise<{
   return apiFetch('/career/trends');
 }
 
-// ── Internal adapter: T010 → Business types ─────────────────────────────
+// ── Internal adapters ───────────────────────────────────────────────────
+
+/** Backend facade (/career/analyze) → CareerAnalysisResult */
+function adaptApiToCareerResult(api: Record<string, unknown>): CareerAnalysisResult {
+  // 后端 facade 返回的结构与 T010 输出一致（snake_case 字段名）
+  // 复用 T010 adapter 做统一转换
+  return adaptT010ToCareerResult({
+    execution_id: api.id,
+    status: api.status,
+    user_profile: api.user_profile,
+    job_recommendations: api.recommendations,
+    strategy_list: api.strategies,
+    career_plan: api.plan,
+    simulation_feedback: api.simulation,
+    frontend_data: api.frontend_data,
+    generated_at: api.generated_at,
+    career_data: api.career_data,
+    errors: api.errors || [],
+  });
+}
 
 function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
   const data = t010 as Record<string, unknown>;
