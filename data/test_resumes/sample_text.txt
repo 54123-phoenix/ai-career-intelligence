@@ -1,0 +1,33 @@
+Jane Smith
+jane.smith@email.com | +1 555 123 4567
+
+PROFESSIONAL SUMMARY
+Data scientist with 4 years of experience in machine learning and NLP applications.
+
+TECHNICAL SKILLS
+Python, PyTorch, TensorFlow, SQL, Spark, Docker, Kubernetes, NLP, Deep Learning, GCP
+
+WORK EXPERIENCE
+
+DataCorp — Data Scientist (2021/03 - Present)
+- Built recommendation engine serving 50M users
+- Tech stack: Python, PyTorch, Spark, GCP
+
+AILabs — Junior ML Engineer (2019/08 - 2021/02)
+- Developed chatbot intent classifier
+- Tech stack: Python, TensorFlow, Docker
+
+PROJECTS
+
+Sentiment Analysis Pipeline
+- Description: Real-time sentiment analysis for social media monitoring
+- Tech stack: Python, NLP, BERT, FastAPI, Redis
+- 2022-06 - 2023-01
+
+EDUCATION
+
+MIT — Master of Science — Data Science (2019)
+University of Washington — Bachelor — Statistics (2017)
+
+CERTIFICATIONS
+- Google Professional Data Engineer
