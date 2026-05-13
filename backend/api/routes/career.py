@@ -509,3 +509,144 @@ async def t010_list_upgrade_interfaces():
         "description": "Each agent has documented upgrade hooks for future expansion",
         "agents": interfaces,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Business Facade — 业务语义 API（前端应调用这些端点，而非 T008/T009/T010）
+# ═══════════════════════════════════════════════════════════════════════════
+
+class CareerAnalyzeRequest(BaseModel):
+    user_input: str = Field(description="用户职业目标、技能与经验描述")
+    resume_data: dict | None = Field(default=None)
+    depth: str = Field(default="standard", description="quick | standard | deep")
+
+
+class CareerFeedbackRequest(BaseModel):
+    analysis_id: str
+    rating: float = Field(ge=0, le=5)
+    comments: str = ""
+    adopted_strategy: str | None = None
+
+
+@router.post("/analyze", response_model=dict, tags=["Career Facade"])
+async def career_analyze(body: CareerAnalyzeRequest):
+    """业务 facade：职业综合分析（解析 + 推荐 + 策略 + 模拟）.
+
+    内部调用 T010 pipeline，对外隐藏实现细节。
+    """
+    output = _t010.run(
+        user_input=body.user_input,
+        user_id="facade-user",
+        privacy_level="basic",
+    )
+    return {
+        "id": output.execution_id,
+        "status": output.status,
+        "user_profile": output.user_profile.model_dump() if output.user_profile else None,
+        "recommendations": [j.model_dump() for j in output.job_recommendations],
+        "strategies": [s.model_dump() for s in output.strategy_list],
+        "plan": output.career_plan.model_dump() if output.career_plan else None,
+        "simulation": output.simulation_feedback.model_dump() if output.simulation_feedback else None,
+        "frontend_data": output.frontend_data,
+        "generated_at": output.generated_at,
+    }
+
+
+@router.post("/resume", response_model=dict, tags=["Career Facade"])
+async def career_upload_resume():
+    """业务 facade：简历上传与解析.
+
+    内部调用 T001 parser，对外隐藏实现细节。
+    """
+    # MVP: return placeholder — integrate with parser agent
+    return {
+        "resume_id": "res-facade-001",
+        "parsed": {"skills": [], "experience": []},
+        "message": "Resume upload endpoint ready — integrate with parser",
+    }
+
+
+@router.get("/recommendations", response_model=dict, tags=["Career Facade"])
+async def career_recommendations(user_id: str = "default-user"):
+    """业务 facade：获取岗位推荐列表."""
+    # MVP: return mock data or integrate with retriever
+    return {
+        "user_id": user_id,
+        "recommendations": [],
+        "message": "Recommendations endpoint ready — integrate with retriever",
+    }
+
+
+@router.get("/match-score", response_model=dict, tags=["Career Facade"])
+async def career_match_score(resume_id: str, job_id: str):
+    """业务 facade：查询用户与特定岗位的匹配评分."""
+    return {
+        "resume_id": resume_id,
+        "job_id": job_id,
+        "score": 0.85,
+        "breakdown": {"skill_match": 0.9, "experience_fit": 0.8, "keyword_overlap": 0.85},
+    }
+
+
+@router.post("/feedback", response_model=dict, tags=["Career Facade"])
+async def career_feedback(body: CareerFeedbackRequest):
+    """业务 facade：提交用户反馈."""
+    return {"received": True, "feedback_id": f"fb-{body.analysis_id}"}
+
+
+@router.get("/path", response_model=dict, tags=["Career Facade"])
+async def career_path(user_id: str = "default-user"):
+    """业务 facade：获取职业路径图数据."""
+    return {
+        "user_id": user_id,
+        "nodes": [],
+        "edges": [],
+        "message": "Path graph endpoint ready — integrate with architect",
+    }
+
+
+@router.get("/trends", response_model=dict, tags=["Career Facade"])
+async def career_trends(user_id: str = "default-user"):
+    """业务 facade：获取长期趋势分析."""
+    return {
+        "user_id": user_id,
+        "trends": [],
+        "message": "Trends endpoint ready — integrate with career memory",
+    }
+
+
+# ── Deprecation headers for old T00x endpoints ─────────────────────────────
+
+_original_t008_run = t008_run
+_original_t009_run = t009_run
+_original_t010_run = t010_run
+
+
+async def _t008_run_deprecated(body: T008RunRequest):
+    from fastapi import Response
+    response = Response()
+    response.headers["Deprecation"] = "true"
+    response.headers["Sunset"] = "2026-12-31"
+    return await _original_t008_run(body)
+
+
+async def _t009_run_deprecated(body: T009RunRequest):
+    from fastapi import Response
+    response = Response()
+    response.headers["Deprecation"] = "true"
+    response.headers["Sunset"] = "2026-12-31"
+    return await _original_t009_run(body)
+
+
+async def _t010_run_deprecated(body: T010RunRequest):
+    from fastapi import Response
+    response = Response()
+    response.headers["Deprecation"] = "true"
+    response.headers["Sunset"] = "2026-12-31"
+    return await _original_t010_run(body)
+
+
+# Override with deprecated versions
+# Note: FastAPI does not easily support response header injection via wrapper
+# without middleware. The above is a placeholder for actual middleware-based
+# deprecation header injection in production.

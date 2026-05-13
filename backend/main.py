@@ -86,6 +86,12 @@ def create_app() -> FastAPI:
 
     app.include_router(career_router, prefix="/api/v1/career", tags=["T007 Career"])
 
+    # Auth & User routes
+    from backend.api.routes.auth import router as auth_router
+
+    app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
+    app.include_router(auth_router, prefix="/api/v1/users", tags=["User"])
+
     return app
 
 
