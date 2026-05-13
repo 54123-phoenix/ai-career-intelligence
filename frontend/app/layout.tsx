@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/components/ui/LanguageProvider';
+import { Navbar } from '@/components/layout/Navbar';
 
 export const metadata: Metadata = {
-  title: 'AI Career Intelligence — Strategic Career Decision System',
-  description: 'Multi-Agent career simulation and strategy optimization platform',
+  title: 'AI Career Intelligence — 智能职业决策平台',
+  description: 'AI-powered career profiling, job recommendations, strategy generation, and path simulation.',
 };
 
 export default function RootLayout({
@@ -13,9 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        <LanguageProvider>{children}</LanguageProvider>
+    <html lang="zh-CN" suppressHydrationWarning>
+      <body className="min-h-screen bg-white text-gray-900 antialiased">
+        <LanguageProvider>
+          <Navbar />
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -12,6 +12,26 @@ const nextConfig = {
         destination: '/dashboard',
         permanent: false,
       },
+      {
+        source: '/career/growth',
+        destination: '/analysis',
+        permanent: true,
+      },
+      {
+        source: '/career/growth-v2',
+        destination: '/analysis',
+        permanent: true,
+      },
+      {
+        source: '/career/_growth-lite',
+        destination: '/analysis',
+        permanent: true,
+      },
+      {
+        source: '/simulation/report',
+        destination: '/simulation',
+        permanent: true,
+      },
     ];
   },
 };

@@ -10,7 +10,7 @@ import { SkillGapChart } from "@/components/simulation/SkillGapChart";
 import { DecisionTimeline } from "@/components/simulation/DecisionTimeline";
 import { HRExplanationPanel } from "@/components/simulation/HRExplanationPanel";
 
-export default function SimulationReportPage() {
+export default function SimulationPage() {
   const [data, setData] = useState<FinalT004Schema | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,22 +40,25 @@ export default function SimulationReportPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Simulation Report</h1>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900">职业模拟与演化</h1>
+      <p className="mb-6 text-sm text-gray-500">
+        模拟不同职业路径上的成长、晋升与技能变化，对比策略优劣
+      </p>
 
       {/* Controls */}
       <div className="mb-6 flex flex-wrap items-end gap-4 rounded-xl border bg-white p-4 shadow-sm">
-        <Select label="Resume" value={resumeId} onChange={setResumeId} options={samples?.resumes ?? {}} />
-        <Select label="Job" value={jobId} onChange={setJobId} options={samples?.jobs ?? {}} />
+        <Select label="简历" value={resumeId} onChange={setResumeId} options={samples?.resumes ?? {}} />
+        <Select label="目标岗位" value={jobId} onChange={setJobId} options={samples?.jobs ?? {}} />
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Strategy</label>
+          <label className="block text-xs text-gray-500 mb-1">策略风格</label>
           <select
             className="rounded-lg border px-3 py-2 text-sm"
             value={strategy}
             onChange={(e) => setStrategy(e.target.value)}
           >
-            <option value="aggressive">Aggressive</option>
-            <option value="balanced">Balanced</option>
-            <option value="conservative">Conservative</option>
+            <option value="aggressive">激进</option>
+            <option value="balanced">均衡</option>
+            <option value="conservative">保守</option>
           </select>
         </div>
         <button
@@ -63,7 +66,7 @@ export default function SimulationReportPage() {
           onClick={handleRun}
           disabled={loading}
         >
-          {loading ? "Running..." : "Run Simulation"}
+          {loading ? "模拟运行中..." : "运行职业模拟"}
         </button>
       </div>
 
@@ -89,7 +92,7 @@ export default function SimulationReportPage() {
           {/* Recommendation Cards */}
           {data.recommendation_cards.length > 0 && (
             <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">Recommendations</h3>
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">策略建议</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {data.recommendation_cards.map((card) => (
                   <div

@@ -1,36 +1,34 @@
 export const en = {
   brand: {
     name: 'AI Career Intelligence',
-    subtitle: 'Multi-Agent Decision System',
+    subtitle: 'Intelligent Career Decision Platform',
   },
   nav: {
     reset: 'Reset',
-    quickRun: 'Quick Run',
-    running: 'Running...',
+    quickRun: 'Quick Analysis',
+    running: 'Analyzing...',
     demoBadge: 'DEMO',
   },
   hero: {
-    title: 'Strategic Career Decision System',
+    title: 'Intelligent Career Decision Platform',
     description:
-      '6-agent pipeline: Parse → Retrieve → Review → Architect → Simulate → Frontend. RL-optimized strategy generation with multi-agent simulation validation.',
-    startBtn: 'Start Demonstration',
+      'AI-powered career profiling, job recommendations, strategy generation, and path simulation to help you make optimal career decisions.',
+    startBtn: 'Start Analysis',
   },
   status: {
-    execution: 'Execution',
     generated: 'Generated',
-    pipeline: 'Pipeline',
     elapsed: 'Elapsed',
     candidates: 'Candidates',
     version: 'Version',
     demoMode: 'Demo Mode — Mock Data',
   },
   actOne: {
-    title: 'Act I — Career Profile',
-    subtitle: 'Input your goals and let agents parse, retrieve, and review',
+    title: 'Career Profile',
+    subtitle: 'Input your goals and let the system parse and recommend',
     inputLabel: 'Describe your career goals, skills, and experience',
     inputPlaceholder: 'e.g. Goal: Senior Backend Engineer, skills: Python, FastAPI...',
-    runBtn: 'Run Intelligence',
-    runningBtn: 'Pipeline Running...',
+    runBtn: 'Run Analysis',
+    runningBtn: 'Analysis Running...',
     experience: 'Experience',
     education: 'Education',
     skillsParsed: 'Skills Parsed',
@@ -40,11 +38,11 @@ export const en = {
     yearSuffix: 'y',
   },
   actTwo: {
-    title: 'Act II — Strategy Battlefield',
-    subtitle: 'Multi-agent scoring + RL-optimized weights',
+    title: 'Strategy Recommendations',
+    subtitle: 'Multi-dimensional scoring and strategy optimization',
     topStrategies: 'Top Strategies',
     offPathWarning: 'Off-Path Warning',
-    rlWeights: 'RL Weights',
+    rlWeights: 'Optimization Weights',
     rlIteration: 'Iter',
     severity: {
       high: 'HIGH',
@@ -53,8 +51,8 @@ export const en = {
     },
   },
   actThree: {
-    title: 'Act III — Simulation Validation',
-    subtitle: 'Multi-agent simulation: Candidate vs HR vs Market',
+    title: 'Simulation Validation',
+    subtitle: 'Simulate career development paths and decision processes',
     avgSuccessRate: 'Avg Success Rate',
     totalRounds: 'Total Rounds',
     passed: 'Passed',
@@ -66,34 +64,8 @@ export const en = {
     overfittingRisk: 'Overfitting Risk',
   },
   pipeline: {
-    title: 'Pipeline Execution',
-    agents: {
-      parser: {
-        name: 'Parser Agent',
-        desc: 'Parsing career goals & skills...',
-      },
-      retrieval: {
-        name: 'Retrieval Agent',
-        desc: 'Matching jobs & strategies...',
-      },
-      reviewer: {
-        name: 'Reviewer Agent',
-        desc: 'Scoring & ranking strategies...',
-      },
-      architect: {
-        name: 'Architect Agent',
-        desc: 'Building career plan & timeline...',
-      },
-      simulator: {
-        name: 'Simulator Agent',
-        desc: 'Running multi-agent simulation...',
-      },
-      frontend: {
-        name: 'Frontend Agent',
-        desc: 'Rendering visualization...',
-      },
-    },
-    logTitle: 'agent-pipeline.log',
+    title: 'Analysis Progress',
+    logTitle: 'analysis.log',
     done: 'DONE',
     running: 'RUNNING',
   },

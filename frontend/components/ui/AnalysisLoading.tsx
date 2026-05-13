@@ -6,29 +6,25 @@ import { useI18n } from '@/lib/i18n';
 import {
   FileText,
   Search,
-  ShieldCheck,
   Compass,
   Activity,
   LayoutTemplate,
 } from 'lucide-react';
 
-const AGENT_ICONS = [
-  <FileText size={18} key="parser" />,
-  <Search size={18} key="retrieval" />,
-  <ShieldCheck size={18} key="reviewer" />,
-  <Compass size={18} key="architect" />,
-  <Activity size={18} key="simulator" />,
-  <LayoutTemplate size={18} key="frontend" />,
-];
-
-const AGENT_KEYS = ['parser', 'retrieval', 'reviewer', 'architect', 'simulator', 'frontend'] as const;
+const STEPS = [
+  { key: 'parse', icon: <FileText size={18} key="parse" />, name: '解析职业画像', desc: '提取技能、经验与目标...' },
+  { key: 'retrieve', icon: <Search size={18} key="retrieve" />, name: '匹配岗位与策略', desc: '检索推荐岗位与发展路径...' },
+  { key: 'architect', icon: <Compass size={18} key="architect" />, name: '生成职业策略', desc: '构建职业规划与行动计划...' },
+  { key: 'simulate', icon: <Activity size={18} key="simulate" />, name: '模拟路径验证', desc: '推演不同策略的成功率...' },
+  { key: 'render', icon: <LayoutTemplate size={18} key="render" />, name: '准备可视化结果', desc: '整理图表与建议...' },
+] as const;
 
 interface Props {
-  /** 0-6, which step is currently active */
+  /** 0-STEPS.length, which step is currently active */
   activeStep?: number;
 }
 
-export function PipelineLoading({ activeStep = -1 }: Props) {
+export function AnalysisLoading({ activeStep = -1 }: Props) {
   const { t } = useI18n();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
@@ -38,18 +34,18 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
   useEffect(() => {
     if (activeStep >= 0) {
       setCurrentStep(activeStep);
-      setProgress((activeStep / AGENT_KEYS.length) * 100);
+      setProgress((activeStep / STEPS.length) * 100);
       return;
     }
 
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
         const next = prev + 1;
-        if (next > AGENT_KEYS.length) {
+        if (next > STEPS.length) {
           clearInterval(interval);
           return prev;
         }
-        setProgress((next / AGENT_KEYS.length) * 100);
+        setProgress((next / STEPS.length) * 100);
         return next;
       });
     }, 900);
@@ -61,14 +57,12 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
   useEffect(() => {
     if (currentStep <= 0) return;
     const logs: string[] = [
-      '> Initializing multi-agent pipeline...',
-      `> ParserAgent: Extracted 8 skills, 3 career goals`,
-      `> RetrievalAgent: Matched 2 jobs, 4 strategy candidates`,
-      `> ReviewerAgent: Applied RL weights, top score 0.87`,
-      `> ArchitectAgent: Generated 5-step career plan (215 days)`,
-      `> SimulatorAgent: Completed 10 rounds, success rate 78%`,
-      `> FrontendAgent: Preparing visualization data...`,
-      '> Pipeline complete. Rendering dashboard.',
+      '> 正在初始化职业分析引擎...',
+      `> 已提取 8 项技能，识别 3 个职业目标`,
+      `> 匹配到 2 个推荐岗位，4 条发展策略`,
+      `> 生成 5 步职业规划（预计 215 天）`,
+      `> 完成 10 轮模拟，平均成功率 78%`,
+      '> 分析完成，正在渲染结果...',
     ];
     if (currentStep <= logs.length) {
       setLogMessages((prev) => {
@@ -99,7 +93,7 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
         </div>
       </div>
 
-      {/* Agent steps */}
+      {/* Steps */}
       <div className="relative">
         {/* Connection line */}
         <div className="absolute left-6 top-8 bottom-8 w-px bg-slate-800" />
@@ -108,23 +102,21 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
           initial={{ height: 0 }}
           animate={{
             height: currentStep > 0
-              ? `${((Math.min(currentStep, AGENT_KEYS.length) - 0.5) / AGENT_KEYS.length) * 100}%`
+              ? `${((Math.min(currentStep, STEPS.length) - 0.5) / STEPS.length) * 100}%`
               : 0,
           }}
           transition={{ duration: 0.6 }}
         />
 
         <div className="space-y-3">
-          {AGENT_KEYS.map((key, idx) => {
+          {STEPS.map((step, idx) => {
             const isDone = idx < currentStep;
-            const isActive = idx === currentStep - 1 && currentStep <= AGENT_KEYS.length;
+            const isActive = idx === currentStep - 1 && currentStep <= STEPS.length;
             const isPending = idx >= currentStep;
-            const name = t(`pipeline.agents.${key}.name`);
-            const desc = t(`pipeline.agents.${key}.desc`);
 
             return (
               <motion.div
-                key={key}
+                key={step.key}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.08 }}
@@ -165,7 +157,7 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
                         />
                       </svg>
                     ) : (
-                      AGENT_ICONS[idx]
+                      step.icon
                     )}
                   </motion.div>
 
@@ -187,7 +179,7 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
                         isDone || isActive ? 'text-slate-200' : 'text-slate-600'
                       }`}
                     >
-                      {name}
+                      {step.name}
                     </span>
                     {isActive && (
                       <motion.span
@@ -207,7 +199,7 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
                       isActive ? 'text-slate-400' : isPending ? 'text-slate-700' : 'text-slate-500'
                     }`}
                   >
-                    {desc}
+                    {step.desc}
                   </p>
                 </div>
               </motion.div>
@@ -238,7 +230,7 @@ export function PipelineLoading({ activeStep = -1 }: Props) {
               className="text-slate-400"
             >
               <span className="text-slate-600">{String(i).padStart(2, '0')}:</span>{' '}
-              <span className={msg.includes('complete') ? 'text-neon-green' : ''}>{msg}</span>
+              <span className={msg.includes('完成') ? 'text-neon-green' : ''}>{msg}</span>
             </motion.div>
           ))}
           <motion.div

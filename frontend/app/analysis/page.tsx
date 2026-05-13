@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { T008PipelineOutput } from "@/types/t008";
-import { runT008Pipeline } from "@/lib/t008-api";
+import type { CareerAnalysisOutput } from "@/types/career";
+import { analyzeCareer } from "@/lib/career-api";
 import {
   StrategyComparison,
   CareerPathGraph,
@@ -46,8 +46,8 @@ const SAMPLE_DATASET: Record<string, unknown>[] = [
   },
 ];
 
-export default function CareerGrowthPage() {
-  const [data, setData] = useState<T008PipelineOutput | null>(null);
+export default function AnalysisPage() {
+  const [data, setData] = useState<CareerAnalysisOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -60,12 +60,13 @@ export default function CareerGrowthPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await runT008Pipeline({
+      const result = await analyzeCareer({
         user_id: "demo-user",
         user_input: userInput,
         career_dataset: SAMPLE_DATASET,
+        privacy_level: "basic",
       });
-      setData(result);
+      setData(result.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -74,47 +75,47 @@ export default function CareerGrowthPage() {
   }
 
   const tabs = [
-    { key: "overview", label: "Overview" },
-    { key: "strategies", label: "Strategies" },
-    { key: "plan", label: "Career Plan" },
-    { key: "path", label: "Skill Path" },
-    { key: "simulation", label: "Simulation" },
-    { key: "recommendations", label: "Recommendations" },
+    { key: "overview", label: "概览" },
+    { key: "recommendations", label: "职业推荐" },
+    { key: "strategies", label: "策略对比" },
+    { key: "plan", label: "职业规划" },
+    { key: "path", label: "技能路径" },
+    { key: "simulation", label: "模拟验证" },
   ];
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="mb-2 text-2xl font-bold text-gray-900">
-        T008 Career Growth System
+        职业分析引擎
       </h1>
       <p className="mb-6 text-sm text-gray-500">
-        6-agent pipeline: parse → retrieve → review → architect → simulate → frontend
+        解析职业画像、推荐匹配岗位、生成发展策略并模拟验证
       </p>
 
       {/* Input controls */}
       <div className="mb-6 rounded-xl border bg-white p-4 shadow-sm">
         <div className="mb-4">
           <label className="mb-1 block text-xs text-gray-500">
-            Career Goals, Skills, Experience
+            职业目标、技能与经验
           </label>
           <textarea
             className="w-full rounded-lg border px-3 py-2 text-sm"
             rows={2}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Describe your career goals, skills, and experience..."
+            placeholder="描述您的职业目标、技能和经验..."
           />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-400">
-            Dataset: {SAMPLE_DATASET.length} sample career entries loaded
+            已加载 {SAMPLE_DATASET.length} 条示例职业数据
           </span>
           <button
             className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             onClick={handleRun}
             disabled={loading}
           >
-            {loading ? "Running Pipeline..." : "Run T008 Pipeline"}
+            {loading ? "分析中..." : "开始职业分析"}
           </button>
         </div>
       </div>
@@ -138,16 +139,13 @@ export default function CareerGrowthPage() {
                     : "bg-red-100 text-red-700"
               }`}
             >
-              {data.status}
+              {data.status === "success" ? "分析完成" : data.status === "partial" ? "部分完成" : "失败"}
             </span>
             <span className="text-gray-400">
-              {data.job_recommendations.length} job matches
+              {data.job_recommendations.length} 个岗位推荐
             </span>
             <span className="text-gray-400">
-              {data.strategy_list.length} strategies scored
-            </span>
-            <span className="text-gray-400">
-              {data.simulation_feedback?.total_rounds ?? 0} simulation rounds
+              {data.strategy_candidates.length} 条候选策略
             </span>
             <span className="text-gray-400">
               {data.elapsed_ms.toFixed(0)}ms
@@ -182,15 +180,15 @@ export default function CareerGrowthPage() {
                     </h3>
                     <div className="grid gap-4 md:grid-cols-3">
                       <StatCard
-                        label="Skill Matches"
+                        label="岗位匹配数"
                         value={data.job_recommendations.length}
                       />
                       <StatCard
-                        label="Top Strategy"
+                        label="最优策略得分"
                         value={`${((data.frontend_data.summary as unknown as Record<string, unknown>).top_strategy_score as number * 100).toFixed(0)}%`}
                       />
                       <StatCard
-                        label="Simulation Success"
+                        label="模拟成功率"
                         value={`${((data.frontend_data.summary as unknown as Record<string, unknown>).simulation_success_rate as number * 100).toFixed(0)}%`}
                       />
                     </div>
@@ -199,18 +197,18 @@ export default function CareerGrowthPage() {
 
                 {data.user_profile && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-3 text-lg font-semibold">User Profile</h3>
+                    <h3 className="mb-3 text-lg font-semibold">用户画像</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-500">Experience</dt>
-                        <dd>{data.user_profile.experience_years} years</dd>
+                        <dt className="text-gray-500">工作经验</dt>
+                        <dd>{data.user_profile.experience_years} 年</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-500">Education</dt>
+                        <dt className="text-gray-500">学历</dt>
                         <dd>{data.user_profile.education_level || "—"}</dd>
                       </div>
                       <div>
-                        <dt className="mb-1 text-gray-500">Skills</dt>
+                        <dt className="mb-1 text-gray-500">技能标签</dt>
                         <dd className="flex flex-wrap gap-1">
                           {data.user_profile.skills.map((s) => (
                             <span
@@ -223,7 +221,7 @@ export default function CareerGrowthPage() {
                         </dd>
                       </div>
                       <div>
-                        <dt className="mb-1 text-gray-500">Goals</dt>
+                        <dt className="mb-1 text-gray-500">职业目标</dt>
                         <dd className="flex flex-wrap gap-1">
                           {data.user_profile.career_goals.map((g, i) => (
                             <span
@@ -241,9 +239,9 @@ export default function CareerGrowthPage() {
 
                 {data.career_data && (
                   <div className="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-3 text-lg font-semibold">Career Dataset</h3>
+                    <h3 className="mb-3 text-lg font-semibold">职业数据</h3>
                     <div className="text-sm text-gray-500 mb-3">
-                      {data.career_data.total_entries} entries parsed
+                      已解析 {data.career_data.total_entries} 条数据
                     </div>
                     <div className="max-h-64 overflow-y-auto space-y-2">
                       {data.career_data.entries.map((entry, i) => (
@@ -281,14 +279,14 @@ export default function CareerGrowthPage() {
             )}
 
             {activeTab === "simulation" && (
-              <SimulationFeedback data={data.simulation_feedback} />
+              <SimulationFeedback data={data.simulation_feedback?.base_feedback ?? null} />
             )}
 
             {activeTab === "recommendations" &&
               !!data.frontend_data?.recommendations && (
                 <div className="rounded-xl border bg-white p-6 shadow-sm">
                   <h3 className="mb-4 text-lg font-semibold">
-                    Recommendations
+                    分析与建议
                   </h3>
                   <div className="grid gap-3 md:grid-cols-2">
                     {(data.frontend_data.recommendations as unknown[]).map((rec: any) => (
@@ -326,7 +324,7 @@ export default function CareerGrowthPage() {
 
             {data.errors.length > 0 && (
               <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-                <div className="font-medium mb-1">Warnings:</div>
+                <div className="font-medium mb-1">提示：</div>
                 {data.errors.map((e, i) => (
                   <div key={i}>• {e}</div>
                 ))}
@@ -338,8 +336,7 @@ export default function CareerGrowthPage() {
 
       {!data && !loading && !error && (
         <div className="rounded-xl border bg-white p-12 text-center text-gray-400">
-          Enter your career goals and skills above, then click &quot;Run T008 Pipeline&quot;
-          to see the full 6-agent career growth analysis.
+          输入您的职业目标与技能，点击“开始职业分析”获取岗位推荐与发展策略
         </div>
       )}
     </main>

@@ -8,12 +8,12 @@ import { ActThreeSimulation } from '@/components/dashboard/ActThreeSimulation';
 import { NodeDetailDrawer } from '@/components/dashboard/NodeDetailDrawer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
-import { PipelineLoading } from '@/components/ui/PipelineLoading';
+import { AnalysisLoading } from '@/components/ui/AnalysisLoading';
 import { TechBackground } from '@/components/ui/TechBackground';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
-import { runT010Pipeline } from '@/lib/t010-api';
+import { analyzeCareer } from '@/lib/career-api';
 import { useI18n } from '@/lib/i18n';
-import type { T010PipelineOutput } from '@/types/t010';
+import type { CareerAnalysisOutput } from '@/types/career';
 import {
   BrainCircuit,
   ChevronDown,
@@ -63,7 +63,7 @@ const SAMPLE_DATASET: Record<string, unknown>[] = [
 
 export default function DashboardPage() {
   const { t } = useI18n();
-  const [data, setData] = useState<T010PipelineOutput | null>(null);
+  const [data, setData] = useState<CareerAnalysisOutput | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userInput, setUserInput] = useState(
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     setDemoStage(0);
     setDataSource(null);
     try {
-      const result = await runT010Pipeline({
+      const result = await analyzeCareer({
         user_id: 'demo-user',
         user_input: userInput,
         career_dataset: SAMPLE_DATASET,
@@ -119,23 +119,9 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-slate-950 pb-20">
       <TechBackground />
 
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
+      {/* Dashboard Toolbar */}
+      <div className="border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-neon-cyan to-neon-blue shadow-lg shadow-cyan-500/20">
-              <BrainCircuit size={20} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold leading-tight text-slate-100">
-                {t('brand.name')}
-              </h1>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">
-                {t('brand.subtitle')}
-              </p>
-            </div>
-          </div>
-
           <div className="flex items-center gap-3">
             {data && (
               <div className="hidden items-center gap-3 text-xs sm:flex">
@@ -153,11 +139,6 @@ export default function DashboardPage() {
                   <Zap size={12} className="mr-1 inline" />
                   {data.strategy_candidates.length} {t('status.candidates')}
                 </span>
-                <span className="text-slate-500">|</span>
-                <span className="text-slate-400">
-                  <Shield size={12} className="mr-1 inline" />
-                  v{data.version}
-                </span>
                 {dataSource === 'mock' && (
                   <>
                     <span className="text-slate-500">|</span>
@@ -169,6 +150,9 @@ export default function DashboardPage() {
                 )}
               </div>
             )}
+          </div>
+
+          <div className="flex items-center gap-3">
             <LanguageSwitcher />
             {data ? (
               <button
@@ -190,7 +174,7 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pt-6">
@@ -266,7 +250,7 @@ export default function DashboardPage() {
               className="flex min-h-[60vh] items-center justify-center py-8"
             >
               <div className="w-full">
-                <PipelineLoading />
+                <AnalysisLoading />
               </div>
             </motion.div>
           )}
@@ -326,13 +310,10 @@ export default function DashboardPage() {
           >
             <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
               <span>
-                {t('status.execution')}: <span className="font-mono text-slate-400">{data.execution_id.slice(0, 8)}</span>
-              </span>
-              <span>
                 {t('status.generated')}: <span className="font-mono text-slate-400">{new Date(data.generated_at).toLocaleTimeString()}</span>
               </span>
               <span>
-                {t('status.pipeline')}: <span className="text-neon-cyan">T010 Lightweight Core</span>
+                {t('status.elapsed')}: <span className="font-mono text-slate-400">{data.elapsed_ms.toFixed(0)}ms</span>
               </span>
               {dataSource === 'mock' && (
                 <span className="rounded bg-amber-500/10 px-2 py-0.5 text-amber-400 ring-1 ring-amber-500/20">
