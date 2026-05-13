@@ -1,4 +1,4 @@
-/** API client — typed wrappers around backend endpoints. */
+/** @deprecated — 本文件保留向后兼容，新代码请使用 lib/api/simulation.ts */
 
 import type { FinalT004Schema } from "@/types/simulation";
 
