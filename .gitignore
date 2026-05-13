@@ -32,3 +32,6 @@ frontend/debug*.txt
 frontend/fix*.py
 frontend/check*.py
 *.log
+
+# Data / runtime
+data/qdrant_storage/

@@ -1,8 +1,10 @@
-"use client";
+'use client';
+
+import type { CareerPlan, CareerPlanTimelineData } from '@/types/career';
 
 interface Props {
-  plan: any;
-  timeline: any[] | null;
+  plan: CareerPlan | null;
+  timeline: CareerPlanTimelineData[] | null;
 }
 
 const PHASE_COLORS: Record<string, string> = {
@@ -79,7 +81,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
                 >
                   {step.phase}
                 </span>
-                {step.milestones.map((m: any, i: number) => (
+                {step.milestones.map((m, i) => (
                   <span
                     key={i}
                     className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600"
@@ -95,11 +97,11 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
 
       {/* Risk & Skill Gaps */}
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {plan.risk_points.length > 0 && (
+        {(plan.risk_points?.length ?? 0) > 0 && (
           <div>
             <div className="mb-2 text-sm font-medium text-red-600">Risks</div>
             <ul className="space-y-1">
-              {plan.risk_points.map((risk: any, i: number) => (
+              {(plan.risk_points ?? []).map((risk, i) => (
                 <li key={i} className="flex gap-2 text-sm">
                   <span className="text-red-400">•</span>
                   <span>{risk}</span>
@@ -109,13 +111,13 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
           </div>
         )}
 
-        {plan.skill_gaps.length > 0 && (
+        {(plan.skill_gaps?.length ?? 0) > 0 && (
           <div>
             <div className="mb-2 text-sm font-medium text-orange-600">
               Skill Gaps
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {plan.skill_gaps.map((gap: any) => (
+              {(plan.skill_gaps ?? []).map((gap) => (
                 <span
                   key={gap}
                   className="rounded bg-orange-50 px-2 py-0.5 text-xs text-orange-700"
@@ -139,7 +141,7 @@ export default function CareerPlanTimeline({ plan, timeline }: Props) {
       <div className="mt-4 flex items-center gap-2">
         <span className="text-sm text-gray-500">Estimated success rate:</span>
         <span className="text-sm font-semibold">
-          {(plan.estimated_success_rate * 100).toFixed(0)}%
+          {((plan.estimated_success_rate ?? 0) * 100).toFixed(0)}%
         </span>
       </div>
     </div>

@@ -282,14 +282,14 @@ export default function AnalysisPage() {
 
             {activeTab === "strategies" && !!data.frontendData?.strategyComparison && (
               <StrategyComparison
-                data={data.frontendData.strategyComparison as any}
+                data={data.frontendData.strategyComparison}
               />
             )}
 
             {activeTab === "plan" && (
               <CareerPlanTimeline
-                plan={data.plan as any}
-                timeline={data.frontendData?.actionTimeline as any}
+                plan={data.plan ?? null}
+                timeline={data.frontendData?.actionTimeline ?? null}
               />
             )}
 
@@ -298,7 +298,7 @@ export default function AnalysisPage() {
             )}
 
             {activeTab === "simulation" && (
-              <SimulationFeedback data={data.simulationResult as any} />
+              <SimulationFeedback data={data.simulationResult ?? null} />
             )}
 
             {/* Feedback */}

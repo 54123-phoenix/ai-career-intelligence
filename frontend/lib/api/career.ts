@@ -7,10 +7,12 @@
 import { apiFetch } from './client';
 import type {
   CareerAnalysisResult,
+  CareerPlan,
   JobRecommendation,
   CareerStrategy,
 } from '@/types/career';
 import type { CareerPathData } from '@/types/simulation';
+import type { StrategyComparisonData, CareerPlanTimelineData } from '@/types/career';
 
 export interface AnalyzeCareerRequest {
   user_input: string;
@@ -200,6 +202,12 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
     plan: data.career_plan
       ? {
           steps: ((data.career_plan as Record<string, unknown>).steps as unknown[]) || [],
+          selected_strategy: (data.career_plan as Record<string, unknown>).selected_strategy as CareerPlan['selected_strategy'],
+          total_duration_days: Number((data.career_plan as Record<string, unknown>).total_duration_days || 0),
+          risk_points: ((data.career_plan as Record<string, unknown>).risk_points as string[]) || [],
+          skill_gaps: ((data.career_plan as Record<string, unknown>).skill_gaps as string[]) || [],
+          recommendation: String((data.career_plan as Record<string, unknown>).recommendation || ''),
+          estimated_success_rate: Number((data.career_plan as Record<string, unknown>).estimated_success_rate || 0),
         }
       : undefined,
     simulationResult: data.simulation_feedback
@@ -222,8 +230,8 @@ function adaptT010ToCareerResult(t010: unknown): CareerAnalysisResult {
         topStrategyScore: Number(summary.top_strategy_score || 0),
         simulationSuccessRate: Number(summary.simulation_success_rate || 0),
       },
-      strategyComparison: fd.strategy_comparison,
-      actionTimeline: (fd.action_timeline as unknown[]) || [],
+      strategyComparison: fd.strategy_comparison as StrategyComparisonData | undefined,
+      actionTimeline: (fd.action_timeline as CareerPlanTimelineData[]) || [],
       recommendationsList: (fd.recommendations as unknown[]) || [],
     },
     careerData: data.career_data

@@ -36,6 +36,16 @@ export interface CareerStrategy {
 
 export interface CareerPlan {
   steps: unknown[];
+  selected_strategy?: {
+    strategy: {
+      strategy_name: string;
+    };
+  };
+  total_duration_days?: number;
+  risk_points?: string[];
+  skill_gaps?: string[];
+  recommendation?: string;
+  estimated_success_rate?: number;
 }
 
 export interface SimulationSummary {
@@ -50,6 +60,42 @@ export interface SimulationSummary {
     overall: number;
     factors: Record<string, number>;
   };
+}
+
+export interface StrategyComparisonData {
+  strategies: Array<{
+    name: string;
+    overall: number;
+    rank: number;
+    success_rate: number;
+    match_degree: number;
+    growth_cycle: number;
+    skill_adaptability: number;
+  }>;
+  dimensions: string[];
+}
+
+export interface CareerPlanTimelineData {
+  step_number: number;
+  title: string;
+  start_day: number;
+  end_day: number;
+  duration_days: number;
+  phase: string;
+  milestones: string[];
+}
+
+export interface CareerPlanDetail {
+  selected_strategy?: {
+    strategy: {
+      strategy_name: string;
+    };
+  };
+  total_duration_days: number;
+  risk_points: string[];
+  skill_gaps: string[];
+  recommendation?: string;
+  estimated_success_rate: number;
 }
 
 export interface CareerAnalysisResult {
@@ -70,8 +116,8 @@ export interface CareerAnalysisResult {
       topStrategyScore?: number;
       simulationSuccessRate?: number;
     };
-    strategyComparison?: unknown;
-    actionTimeline?: unknown[];
+    strategyComparison?: StrategyComparisonData;
+    actionTimeline?: CareerPlanTimelineData[];
     recommendationsList?: unknown[];
   };
   careerData?: {

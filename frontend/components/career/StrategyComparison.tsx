@@ -1,7 +1,9 @@
-"use client";
+'use client';
+
+import type { StrategyComparisonData } from '@/types/career';
 
 interface Props {
-  data: any;
+  data: StrategyComparisonData | null;
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
@@ -28,7 +30,7 @@ export default function StrategyComparison({ data }: Props) {
 
       {/* Bar chart */}
       <div className="mb-6 space-y-4">
-        {data.strategies.map((s: any, i: number) => (
+        {data.strategies.map((s, i) => (
           <div key={s.name} className="flex items-center gap-3">
             <span
               className="w-24 text-sm font-medium"
@@ -60,7 +62,7 @@ export default function StrategyComparison({ data }: Props) {
         <thead>
           <tr className="border-b text-left text-gray-500">
             <th className="pb-2 font-medium">Strategy</th>
-            {data.dimensions.map((dim: any) => (
+            {data.dimensions.map((dim) => (
               <th key={dim} className="pb-2 font-medium">
                 {DIMENSION_LABELS[dim] || dim}
               </th>
@@ -69,7 +71,7 @@ export default function StrategyComparison({ data }: Props) {
           </tr>
         </thead>
         <tbody>
-          {data.strategies.map((s: any, i: number) => (
+          {data.strategies.map((s, i) => (
             <tr key={s.name} className="border-b last:border-0">
               <td
                 className="py-2 font-medium"

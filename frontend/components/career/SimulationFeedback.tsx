@@ -1,7 +1,23 @@
-"use client";
+'use client';
+
+import type { SimulationSummary } from '@/types/career';
+
+interface LegacySimulationFeedback {
+  average_success_rate: number;
+  total_rounds: number;
+  successful_rounds: number;
+  recommendation?: string;
+  rounds?: Array<{
+    round_id: number;
+    success: boolean;
+    success_probability: number;
+  }>;
+  aggregated_risks?: Record<string, number>;
+  aggregated_skill_gaps?: Record<string, number>;
+}
 
 interface Props {
-  data: any;
+  data: SimulationSummary | LegacySimulationFeedback | null;
 }
 
 export default function SimulationFeedbackPanel({ data }: Props) {
@@ -14,7 +30,7 @@ export default function SimulationFeedbackPanel({ data }: Props) {
   }
 
   // Legacy format (t008 SimulationFeedback)
-  if (data.average_success_rate !== undefined) {
+  if ('average_success_rate' in data) {
     const successColor =
       data.average_success_rate >= 0.7
         ? "text-green-600"
@@ -55,7 +71,7 @@ export default function SimulationFeedbackPanel({ data }: Props) {
         {data.rounds && data.rounds.length > 0 && (
           <div className="mb-6 space-y-1.5">
             <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Per-Round Probabilities</div>
-            {data.rounds.map((r: any) => (
+            {data.rounds.map((r) => (
               <div key={r.round_id} className="flex items-center gap-2 text-xs">
                 <span className="w-8 text-right font-mono text-gray-400">
                   #{r.round_id}
@@ -84,9 +100,9 @@ export default function SimulationFeedbackPanel({ data }: Props) {
             <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Top Risks</div>
             <div className="space-y-1">
               {Object.entries(data.aggregated_risks)
-                .sort((a: any, b: any) => b[1] - a[1])
+                .sort((a, b) => (b[1] as number) - (a[1] as number))
                 .slice(0, 5)
-                .map(([risk, count]: any) => (
+                .map(([risk, count]) => (
                   <div key={risk} className="flex items-center gap-2 text-sm">
                     <span className="text-red-500">⚠</span>
                     <span className="flex-1">{risk}</span>
@@ -104,9 +120,9 @@ export default function SimulationFeedbackPanel({ data }: Props) {
             </div>
             <div className="space-y-1">
               {Object.entries(data.aggregated_skill_gaps)
-                .sort((a: any, b: any) => b[1] - a[1])
+                .sort((a, b) => (b[1] as number) - (a[1] as number))
                 .slice(0, 5)
-                .map(([gap, count]: any) => (
+                .map(([gap, count]) => (
                   <div key={gap} className="flex items-center gap-2 text-sm">
                     <span className="text-orange-500">●</span>
                     <span className="flex-1">{gap}</span>
