@@ -31,6 +31,10 @@ LEVEL_EXPECTATIONS: dict[str, int] = {
     "lead": 7,
     "staff": 8,
     "principal": 10,
+    # Internal level codes (阿里 P series / 腾讯 T series / 字节 2-x~3-x)
+    "p5": 1, "p6": 3, "p7": 5, "p8": 8, "p9": 11,
+    "t5": 1, "t6": 3, "t7": 5, "t8": 8, "t9": 11,
+    "2-1": 3, "2-2": 4, "3-1": 6, "3-2": 8,
 }
 
 # Hard pass: reject if skill match below this AND no related skills
