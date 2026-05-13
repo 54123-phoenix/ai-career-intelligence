@@ -206,3 +206,25 @@ export interface CareerPathGraph {
   nodes: CareerPathNode[];
   edges: CareerPathEdge[];
 }
+
+/** Career path data returned by /career/path */
+export interface CareerPathData {
+  primary_path: string[];
+  skill_nodes: CareerPathSkillNode[];
+  timeline_nodes: CareerPathTimelineNode[];
+  skill_edges: [string, string][];
+}
+
+export interface CareerPathSkillNode {
+  skill_name: string;
+  level: string;
+  dependencies: string[];
+  estimated_hours: number;
+}
+
+export interface CareerPathTimelineNode {
+  week: number;
+  event_type: string;
+  label: string;
+  details?: string;
+}

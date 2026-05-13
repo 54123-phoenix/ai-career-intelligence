@@ -10,7 +10,7 @@ import type {
   JobRecommendation,
   CareerStrategy,
 } from '@/types/career';
-import type { CareerPathGraph } from '@/types/simulation';
+import type { CareerPathData } from '@/types/simulation';
 
 export interface AnalyzeCareerRequest {
   user_input: string;
@@ -119,12 +119,7 @@ export async function submitCareerFeedback(params: {
 }
 
 /** 获取职业路径图数据 */
-export async function getCareerPath(user_input: string): Promise<{
-  primary_path: string[];
-  skill_nodes: any[];
-  timeline_nodes: any[];
-  skill_edges: any[];
-}> {
+export async function getCareerPath(user_input: string): Promise<CareerPathData> {
   return apiFetch('/career/path', {
     method: 'POST',
     body: JSON.stringify({ user_input }),

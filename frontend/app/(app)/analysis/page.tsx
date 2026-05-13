@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { CareerAnalysisResult } from "@/types/career";
-import { analyzeCareer, submitCareerFeedback } from "@/lib/api/career";
+import type { CareerPathData } from "@/types/simulation";
+import { analyzeCareer, submitCareerFeedback, getCareerPath } from "@/lib/api/career";
 import {
   StrategyComparison,
   CareerPathGraph,
@@ -13,6 +14,7 @@ import SkillRadar from "@/components/analysis/SkillRadar";
 
 export default function AnalysisPage() {
   const [data, setData] = useState<CareerAnalysisResult | null>(null);
+  const [pathData, setPathData] = useState<CareerPathData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -28,12 +30,17 @@ export default function AnalysisPage() {
   async function handleRun() {
     setLoading(true);
     setError(null);
+    setPathData(null);
     try {
-      const result = await analyzeCareer({
-        user_input: userInput,
-        depth: "standard",
-      });
+      const [result, path] = await Promise.all([
+        analyzeCareer({
+          user_input: userInput,
+          depth: "standard",
+        }),
+        getCareerPath(userInput).catch(() => null),
+      ]);
       setData(result.data);
+      setPathData(path);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -287,7 +294,7 @@ export default function AnalysisPage() {
             )}
 
             {activeTab === "path" && (
-              <CareerPathGraph data={null} />
+              <CareerPathGraph data={pathData} />
             )}
 
             {activeTab === "simulation" && (

@@ -1,7 +1,9 @@
-"use client";
+'use client';
+
+import type { CareerPathData } from '@/types/simulation';
 
 interface Props {
-  data: any;
+  data: CareerPathData | null;
 }
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -19,7 +21,7 @@ const EVENT_ICONS: Record<string, string> = {
   milestone: "🏁",
 };
 
-function SkillNodeCard({ node }: { node: any }) {
+function SkillNodeCard({ node }: { node: CareerPathData['skill_nodes'][number] }) {
   const color = LEVEL_COLORS[node.level] || "#95a5a6";
   return (
     <div
@@ -49,7 +51,7 @@ function SkillNodeCard({ node }: { node: any }) {
   );
 }
 
-function TimelineNodeRow({ node }: { node: any }) {
+function TimelineNodeRow({ node }: { node: CareerPathData['timeline_nodes'][number] }) {
   return (
     <div className="flex items-start gap-3 py-2">
       <div className="mt-0.5 text-lg">{EVENT_ICONS[node.event_type] || "●"}</div>
@@ -87,7 +89,7 @@ export default function CareerPathGraph({ data }: Props) {
           <div className="mb-4">
             <div className="mb-2 text-sm text-gray-500">Primary Path</div>
             <div className="flex flex-wrap items-center gap-2">
-              {data.primary_path.map((skill: any, i: number) => (
+              {data.primary_path.map((skill, i) => (
                 <span key={skill}>
                   <span className="rounded bg-blue-50 px-2 py-1 text-sm font-medium text-blue-700">
                     {skill}
@@ -102,7 +104,7 @@ export default function CareerPathGraph({ data }: Props) {
         )}
 
         <div className="space-y-3">
-          {data.skill_nodes.map((node: any) => (
+          {data.skill_nodes.map((node) => (
             <SkillNodeCard key={node.skill_name} node={node} />
           ))}
         </div>
@@ -111,7 +113,7 @@ export default function CareerPathGraph({ data }: Props) {
           <div className="mt-4 text-xs text-gray-400">
             Dependencies:{" "}
             {data.skill_edges
-              .map((edge: any[]) => `${edge[0]} → ${edge[1]}`)
+              .map((edge) => `${edge[0]} → ${edge[1]}`)
               .join(", ")}
           </div>
         )}
